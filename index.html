@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Work Item Extractor</title>
+    <!-- Bibliotecas JS para Markdown e Excel -->
+    <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            /* Cores padrão do Azure DevOps */
+            --az-blue: #0078D4;
+            --az-blue-hover: #106EBE;
+            --az-dark: #201F1E;
+            --az-bg: #F3F2F1;
+            --az-surface: #FFFFFF;
+            --az-text: #323130;
+            --az-border: #EDEBE9;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--az-bg); color: var(--az-text); display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar Form */
+        .sidebar { width: 350px; background-color: var(--az-surface); border-right: 1px solid var(--az-border); padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+        .sidebar h2 { font-size: 18px; color: var(--az-dark); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 12px; font-weight: 600; color: var(--az-dark); }
+        input, textarea { padding: 8px; border: 1px solid var(--az-border); border-radius: 4px; font-size: 13px; outline: none; }
+        input:focus, textarea:focus { border-color: var(--az-blue); }
+        textarea { resize: vertical; min-height: 60px; }
+        button { background-color: var(--az-blue); color: white; border: none; padding: 10px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        button:hover { background-color: var(--az-blue-hover); }
+        button:disabled { background-color: #A19F9D; cursor: not-allowed; }
+
+        /* Main Content */
+        .main-content { flex: 1; display: flex; flex-direction: column; background-color: var(--az-surface); margin: 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; }
+        
+        /* Tabs */
+        .tabs { display: flex; border-bottom: 1px solid var(--az-border); background-color: #FAFAFA; }
+        .tab-btn { flex: 1; background: none; color: var(--az-text); border-radius: 0; font-weight: 400; padding: 12px; border-bottom: 2px solid transparent; }
+        .tab-btn.active { border-bottom-color: var(--az-blue); font-weight: 600; color: var(--az-blue); background-color: var(--az-surface); }
+        
+        /* Tab Content */
+        .tab-content { flex: 1; padding: 20px; display: none; overflow-y: auto; flex-direction: column; }
+        .tab-content.active { display: flex; }
+        .action-bar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+        .download-btn { background-color: #107C10; padding: 6px 12px; font-size: 13px; color: white; border: none; border-radius: 4px; cursor: pointer;}
+        .download-btn:hover { background-color: #0B5A0B; }
+        
+        pre, textarea.output-box { flex: 1; width: 100%; padding: 15px; border: 1px solid var(--az-border); border-radius: 4px; background-color: #F8F8F8; font-family: Consolas, monospace; font-size: 13px; resize: none; overflow: auto; white-space: pre-wrap; }
+        
+        /* Logs */
+        .log-box { background-color: var(--az-dark); color: #00FF00; font-family: Consolas, monospace; padding: 15px; font-size: 12px; border-radius: 4px; overflow-y: auto; max-height: 200px; margin-top: 10px; }
+        
+        /* CORS Warning */
+        .alert { background-color: #FFF4CE; border-left: 4px solid #F8AA00; padding: 10px; font-size: 12px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Azure Work Item Extractor</h2>
+        <div class="alert">
+            <strong>Aviso de CORS:</strong> Como esta página roda no navegador, a API do Azure pode bloquear a requisição. Se der erro de CORS, instale a extensão "Allow CORS" no seu navegador.
+        </div>
+        <div class="form-group">
+            <label>Organization</label>
+            <input type="text" id="org" placeholder="ex: lamoda" value="lamoda">
+        </div>
+        <div class="form-group">
+            <label>Project</label>
+            <input type="text" id="proj" placeholder="ex: Digital" value="Digital">
+        </div>
+        <div class="form-group">
+            <label>Personal Access Token (PAT)</label>
+            <input type="password" id="pat" placeholder="Cole seu PAT aqui">
+        </div>
+        <div class="form-group">
+            <label>IDs dos Work Items (Sementes)</label>
+            <textarea id="ids" placeholder="Ex: 14501, 5640 (separados por vírgula)"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Limite Máximo de Itens (Aranha)</label>
+            <input type="number" id="maxItems" value="50" min="1" max="200">
+        </div>
+        <button id="btnRun" onclick="runExtraction()">Iniciar Extração</button>
+        
+        <div class="log-box" id="logBox">Aguardando início...</div>
+    </div>
+
+    <div class="main-content">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tab-json')">Visão JSON</button>
+            <button class="tab-btn" onclick="switchTab('tab-md')">Visão Markdown (IA)</button>
+            <button class="tab-btn" onclick="switchTab('tab-excel')">Visão Excel</button>
+        </div>
+
+        <!-- Tab JSON -->
+        <div id="tab-json" class="tab-content active">
+            <div class="action-bar">
+                <button class="download-btn" onclick="downloadFile('json')">📥 Download JSON</button>
+            </div>
+            <textarea class="output-box" id="out-json" readonly>Os dados aparecerão aqui após a extração.</textarea>
+        </div>
+
+        <!-- Tab Markdown -->
+        <div id="tab-md" class="tab-content">
+            <div class="action-bar">
+                <button class="download-btn" onclick="downloadFile('md')">📥 Download MD</button>
+            </div>
+            <textarea class="output-box" id="out-md" readonly>O Markdown formatado para IA aparecerá aqui.</textarea>
+        </div>
+
+        <!-- Tab Excel -->
+        <div id="tab-excel" class="tab-content">
+            <div class="action-bar">
+                <button class="download-btn" onclick="downloadFile('excel')">📥 Download XLSX</button>
+            </div>
+            <div style="padding: 20px; text-align: center; color: var(--az-dark);">
+                <h3>Planilha pronta em memória!</h3>
+                <p>Clique no botão acima para baixar o arquivo .xlsx estruturado.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const turndownService = new TurndownService({ headingStyle: 'atx' });
+        
+        turndownService.addRule('faxina', {
+            filter: ['img', 'a'],
+            replacement: function (content) {
+                return content;
+            }
+        });
+        
+        let globalData = [];
+
+        function log(msg) {
+            const box = document.getElementById('logBox');
+            box.innerHTML += `<div>${msg}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function fetchAPI(url, headers) {
+            try {
+                const response = await fetch(url, { headers });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                return null;
+            }
+        }
+
+        async function runExtraction() {
+            const org = document.getElementById('org').value.trim();
+            const proj = document.getElementById('proj').value.trim();
+            const pat = document.getElementById('pat').value.trim();
+            const rawIds = document.getElementById('ids').value;
+            const maxItems = parseInt(document.getElementById('maxItems').value);
+            
+            if (!org || !proj || !pat || !rawIds) {
+                alert("Preencha todos os campos antes de continuar.");
+                return;
+            }
+
+            const headers = {
+                'Authorization': 'Basic ' + btoa(':' + pat),
+                'Content-Type': 'application/json'
+            };
+
+            const initialIds = rawIds.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+            const queue = [...initialIds];
+            const processed = new Set();
+            globalData = [];
+
+            document.getElementById('logBox').innerHTML = '';
+            document.getElementById('btnRun').disabled = true;
+            log(`Extração iniciada. ID(s): ${initialIds.join(', ')}`);
+
+            while (queue.length > 0 && processed.size < maxItems) {
+                const id = queue.shift();
+                if (processed.has(id)) continue;
+                processed.add(id);
+
+                log(`Analisando Work Item: ${id}...`);
+                
+                // 1. DADOS PRINCIPAIS
+                const wiUrl = `https://dev.azure.com/${org}/${proj}/_apis/wit/workitems/${id}?$expand=All&api-version=7.1`;
+                const wiData = await fetchAPI(wiUrl, headers);
+                
+                if (!wiData) {
+                    log(`   [!] Erro ou acesso negado no WI ${id}`);
+                    continue;
+                }
+
+                const fields = wiData.fields || {};
+                const wiType = fields['System.WorkItemType'] || '';
+                
+                if (wiType.toLowerCase() === 'feature') {
+                    log(`   [!] Ignorado: É uma Feature.`);
+                    continue;
+                }
+
+                // 2. RELAÇÕES E ANEXOS
+                const anexos = [];
+                const relations = wiData.relations || [];
+                relations.forEach(rel => {
+                    if (rel.rel === 'AttachedFile') {
+                        anexos.push({ nome: rel.attributes?.name || 'Anexo', url: rel.url });
+                    } else if (['System.LinkTypes.Hierarchy-Reverse', 'System.LinkTypes.Hierarchy-Forward', 'System.LinkTypes.Related'].includes(rel.rel)) {
+                        const relId = parseInt(rel.url.split('/').pop());
+                        if (relId && !processed.has(relId)) queue.push(relId);
+                    }
+                });
+
+                // 3. COMENTÁRIOS (Formatados e Ordenados decrescente)
+                const commentsUrl = `https://dev.azure.com/${org}/${proj}/_apis/wit/workitems/${id}/comments?api-version=7.1-preview`;
+                const commentsData = await fetchAPI(commentsUrl, headers);
+                let comentariosList = (commentsData?.comments || []).map(c => {
+                    return {
+                        autor: c.createdBy?.displayName || 'Desconhecido',
+                        data: c.createdDate || '',
+                        texto: turndownService.turndown(c.text || '').trim()
+                    };
+                }).filter(c => c.texto !== '');
+                
+                comentariosList.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+                // 4. HISTÓRICO / TIMELINE DE ALTERAÇÕES (Formatados e Ordenados decrescente)
+                const updatesUrl = `https://dev.azure.com/${org}/${proj}/_apis/wit/workitems/${id}/updates?api-version=7.1`;
+                const updatesData = await fetchAPI(updatesUrl, headers);
+                let historicoList = [];
+                
+                if (updatesData && updatesData.value) {
+                    updatesData.value.forEach(update => {
+                        const date = update.fields?.['System.ChangedDate']?.newValue || update.revisedDate;
+                        const author = update.revisedBy?.displayName || update.fields?.['System.ChangedBy']?.newValue || 'Sistema';
+                        const uFields = update.fields;
+                        let alteracoes = [];
+
+                        if (uFields) {
+                            if (uFields['System.State']) {
+                                alteracoes.push(`Status: ${uFields['System.State'].oldValue || 'Vazio'} ➔ ${uFields['System.State'].newValue}`);
+                            }
+                            if (uFields['System.AssignedTo']) {
+                                const oldAssigned = uFields['System.AssignedTo'].oldValue?.displayName || 'Ninguém';
+                                const newAssigned = uFields['System.AssignedTo'].newValue?.displayName || 'Ninguém';
+                                alteracoes.push(`Responsável: ${oldAssigned} ➔ ${newAssigned}`);
+                            }
+                            if (uFields['System.IterationPath']) {
+                                const oldSprint = uFields['System.IterationPath'].oldValue || 'Vazio';
+                                const newSprint = uFields['System.IterationPath'].newValue || 'Vazio';
+                                alteracoes.push(`Sprint: ${oldSprint} ➔ ${newSprint}`);
+                            }
+                        }
+
+                        if (alteracoes.length > 0) {
+                            historicoList.push({ data: date, autor: author, texto: alteracoes.join(' | ') });
+                        }
+                    });
+                }
+                
+                historicoList.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+                // 5. DESCRIÇÃO E CONSOLIDAÇÃO
+                const descHtml = fields['Custom.2b6eb56d-7ed5-4d83-ad4b-40614d689fae'] || fields['System.Description'] || 'Sem descrição';
+                const descMd = turndownService.turndown(descHtml).trim();
+
+                const itemData = {
+                    ID: fields['System.Id'],
+                    Tipo: wiType,
+                    Titulo: fields['System.Title'],
+                    Status: fields['System.State'],
+                    Sprint: fields['System.IterationPath'] || '',
+                    Area: fields['System.AreaPath'] || '',
+                    Responsavel: fields['System.AssignedTo']?.displayName || 'Não atribuído',
+                    Tags: fields['System.Tags'] || '',
+                    Data_Criacao: fields['System.CreatedDate'] || '',
+                    Ultima_Alteracao: fields['System.ChangedDate'] || '',
+                    ID_Pai: fields['System.Parent'] || 'Nenhum',
+                    Anexos: anexos,
+                    Descricao_MD: descMd,
+                    Comentarios: comentariosList, // Comentários agora vêm antes no objeto JSON
+                    Historico_Alteracoes: historicoList, // Histórico no final
+                    URL: wiData._links?.html?.href || ''
+                };
+
+                globalData.push(itemData);
+                log(`   ✔ ${wiType} incorporado.`);
+            }
+
+            log(`\n✅ Extração concluída! ${globalData.length} itens.`);
+            document.getElementById('btnRun').disabled = false;
+            
+            renderOutputs();
+        }
+
+        function renderOutputs() {
+            // JSON
+            document.getElementById('out-json').value = JSON.stringify(globalData, null, 4);
+
+            // MARKDOWN
+            let md = "# Base de Conhecimento - Azure DevOps\n\n";
+            globalData.forEach(item => {
+                md += `## [${item.Tipo} ${item.ID}] ${item.Titulo}\n\n`;
+                md += `### Metadados\n`;
+                md += `- **Status Atual:** ${item.Status}\n- **Responsável:** ${item.Responsavel}\n`;
+                md += `- **Sprint:** ${item.Sprint}\n- **Tags:** ${item.Tags}\n- **Item Pai:** ${item.ID_Pai}\n`;
+                md += `- **Criado em:** ${item.Data_Criacao}\n- **Última Atualização:** ${item.Ultima_Alteracao}\n`;
+                
+                if (item.Anexos.length > 0) {
+                    md += `- **Arquivos Anexados:**\n`;
+                    item.Anexos.forEach(a => md += `  - \`${a.nome}\` (Link Azure)\n`);
+                }
+                md += `- **Acessar no Azure:** [Link](${item.URL})\n\n`;
+                
+                md += `### Descrição\n\n${item.Descricao_MD}\n\n`;
+                
+                if (item.Comentarios.length > 0) {
+                    md += `### Histórico de Discussões\n\n`;
+                    item.Comentarios.forEach(c => md += `**${c.autor}** (${c.data}):\n${c.texto}\n\n`);
+                }
+                
+                if (item.Historico_Alteracoes.length > 0) {
+                    md += `### Timeline de Alterações Principais\n\n`;
+                    item.Historico_Alteracoes.forEach(h => md += `- **${h.data}** (${h.autor}): ${h.texto}\n`);
+                    md += `\n`;
+                }
+
+                md += `---\n\n`;
+            });
+            document.getElementById('out-md').value = md;
+        }
+
+        function downloadFile(type) {
+            if (globalData.length === 0) {
+                alert("Nenhum dado para exportar. Rode a extração primeiro.");
+                return;
+            }
+
+            if (type === 'json') {
+                const blob = new Blob([document.getElementById('out-json').value], { type: "application/json" });
+                saveAs(blob, "01_dados_ia.json");
+            } 
+            else if (type === 'md') {
+                const blob = new Blob([document.getElementById('out-md').value], { type: "text/markdown" });
+                saveAs(blob, "02_contexto_ia.md");
+            } 
+            else if (type === 'excel') {
+                const excelData = globalData.map(row => {
+                    const r = { ...row };
+                    r.Comentarios = r.Comentarios.map(c => `[${c.data}] ${c.autor}:\n${c.texto}`).join('\n\n');
+                    r.Historico_Alteracoes = r.Historico_Alteracoes.map(h => `[${h.data}] ${h.autor}: ${h.texto}`).join('\n');
+                    r.Anexos = r.Anexos.map(a => a.nome).join('\n');
+                    return r;
+                });
+                const worksheet = XLSX.utils.json_to_sheet(excelData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Work Items");
+                XLSX.writeFile(workbook, "03_dados_planilha.xlsx");
+            }
+        }
+
+        function saveAs(blob, filename) {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
