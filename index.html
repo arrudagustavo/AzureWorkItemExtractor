@@ -50,7 +50,20 @@
         .download-btn:hover { background-color: #0B5A0B; }
         
         pre, textarea.output-box { flex: 1; width: 100%; padding: 15px; border: 1px solid var(--az-border); border-radius: 4px; background-color: #F8F8F8; font-family: Consolas, monospace; font-size: 13px; resize: none; overflow: auto; white-space: pre-wrap; }
-        
+
+        /* Excel Preview Table */
+        .excel-preview-wrap { flex: 1; overflow: auto; border: 1px solid var(--az-border); border-radius: 4px; }
+        table.excel-preview { border-collapse: collapse; width: 100%; font-size: 12px; }
+        table.excel-preview th, table.excel-preview td { border: 1px solid var(--az-border); padding: 6px 10px; text-align: left; white-space: nowrap; }
+        table.excel-preview th { background-color: #FAFAFA; position: sticky; top: 0; z-index: 1; color: var(--az-dark); }
+        table.excel-preview td.truncate { max-width: 260px; overflow: hidden; text-overflow: ellipsis; cursor: help; }
+        table.excel-preview tbody tr:nth-child(even) { background-color: #FBFBFB; }
+        table.excel-preview tbody tr:hover { background-color: #F3F9FD; }
+        table.excel-preview td.center { text-align: center; }
+        table.excel-preview a.row-link { color: var(--az-blue); text-decoration: none; font-weight: 600; }
+        table.excel-preview a.row-link:hover { text-decoration: underline; }
+        .excel-empty { padding: 20px; text-align: center; color: var(--az-dark); }
+
         /* Logs */
         .log-box { background-color: var(--az-dark); color: #00FF00; font-family: Consolas, monospace; padding: 15px; font-size: 12px; border-radius: 4px; overflow-y: auto; max-height: 200px; margin-top: 10px; }
         
@@ -78,12 +91,12 @@
             <input type="password" id="pat" placeholder="Cole seu PAT aqui">
         </div>
         <div class="form-group">
-            <label>IDs dos Work Items (Sementes)</label>
+            <label>IDs dos Work Items</label>
             <textarea id="ids" placeholder="Ex: 14501, 5640 (separados por vírgula)"></textarea>
         </div>
         <div class="form-group">
-            <label>Limite Máximo de Itens (Aranha)</label>
-            <input type="number" id="maxItems" value="50" min="1" max="200">
+            <label>Limite Máximo de Itens</label>
+            <input type="number" id="maxItems" value="1000" min="1" max="1000">
         </div>
         <button id="btnRun" onclick="runExtraction()">Iniciar Extração</button>
         
@@ -118,9 +131,8 @@
             <div class="action-bar">
                 <button class="download-btn" onclick="downloadFile('excel')">📥 Download XLSX</button>
             </div>
-            <div style="padding: 20px; text-align: center; color: var(--az-dark);">
-                <h3>Planilha pronta em memória!</h3>
-                <p>Clique no botão acima para baixar o arquivo .xlsx estruturado.</p>
+            <div class="excel-preview-wrap">
+                <div id="excel-preview" class="excel-empty">Os dados aparecerão aqui após a extração.</div>
             </div>
         </div>
     </div>
@@ -339,6 +351,63 @@
                 md += `---\n\n`;
             });
             document.getElementById('out-md').value = md;
+
+            renderExcelPreview();
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
+        function renderExcelPreview() {
+            const container = document.getElementById('excel-preview');
+
+            if (globalData.length === 0) {
+                container.className = 'excel-empty';
+                container.innerHTML = 'Os dados aparecerão aqui após a extração.';
+                return;
+            }
+
+            const cols = [
+                { key: 'ID', label: 'ID' },
+                { key: 'Tipo', label: 'Tipo' },
+                { key: 'Titulo', label: 'Título', truncate: true },
+                { key: 'Status', label: 'Status' },
+                { key: 'Sprint', label: 'Sprint', truncate: true },
+                { key: 'Responsavel', label: 'Responsável' },
+                { key: 'Tags', label: 'Tags', truncate: true },
+                { key: 'ID_Pai', label: 'Pai' },
+                { key: 'Data_Criacao', label: 'Criado em' },
+                { key: 'Ultima_Alteracao', label: 'Última Alteração' },
+            ];
+
+            let html = '<table class="excel-preview"><thead><tr>';
+            cols.forEach(c => html += `<th>${escapeHtml(c.label)}</th>`);
+            html += '<th class="center">Comentários</th><th class="center">Histórico</th><th class="center">Anexos</th><th>Link</th>';
+            html += '</tr></thead><tbody>';
+
+            globalData.forEach(item => {
+                html += '<tr>';
+                cols.forEach(c => {
+                    const value = escapeHtml(item[c.key]);
+                    if (c.truncate) {
+                        html += `<td class="truncate" title="${value}">${value}</td>`;
+                    } else {
+                        html += `<td>${value}</td>`;
+                    }
+                });
+                html += `<td class="center">${item.Comentarios.length}</td>`;
+                html += `<td class="center">${item.Historico_Alteracoes.length}</td>`;
+                html += `<td class="center">${item.Anexos.length}</td>`;
+                html += `<td>${item.URL ? `<a class="row-link" href="${escapeHtml(item.URL)}" target="_blank" rel="noopener">Abrir ↗</a>` : ''}</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.className = '';
+            container.innerHTML = html;
         }
 
         function downloadFile(type) {
