@@ -219,10 +219,11 @@
 
   // Cores fixas por Tipo / Status (como vier na coluna) — cai no palette cíclico se aparecer um valor novo
   const TIPO_COLORS = {
-    'Bug': '#F43F5E',          // vermelho
-    'User Story': '#2DD4BF',   // verde água
-    'Task': '#22C55E',         // verde
-    'Problema': '#FB923C'      // laranja
+    'Bug': '#F43F5E',              // vermelho
+    'User Story': '#2DD4BF',       // verde água
+    'User Story Design': '#22C55E',// verde
+    'Task': '#22C55E',             // verde
+    'Problema': '#FB923C'          // laranja
   };
   const STATUS_COLORS = {
     'Closed': '#22C55E',            // verde
@@ -572,7 +573,7 @@
         { label:'Bug', data: d.perSprintBug, backgroundColor: tipoColor('Bug'), borderRadius:6 },
         { label:'User Story', data: d.perSprintUS, backgroundColor: tipoColor('User Story'), borderRadius:6 }
       ]},
-      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:10}}, datalabels:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}}, x:{grid:{display:false}} } }
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:10}}, datalabels:{color: (ctx)=>contrastText(ctx.dataset.backgroundColor), font:{weight:'700',size:10}, formatter:v=>v>0?v:''}}, scales:{ y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}}, x:{grid:{display:false}} } }
     });
 
     charts.status = new Chart(document.getElementById('statusChart'), {
@@ -592,7 +593,7 @@
     charts.areaType = new Chart(document.getElementById('areaTypeChart'), {
       type:'bar',
       data:{ labels: d.areas, datasets: d.tipos.map(t => ({ label:t, data: d.perAreaByTipo[t], backgroundColor: tipoColor(t), borderRadius:4 })) },
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:9,font:{size:9}}}, datalabels:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}}, x:{grid:{display:false}} } }
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:9,font:{size:9}}}, datalabels:{color: (ctx)=>contrastText(ctx.dataset.backgroundColor), font:{weight:'700',size:10}, formatter:v=>v>0?v:''}}, scales:{ y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}}, x:{grid:{display:false}} } }
     });
 
     renderPivot(d.areas, d.states, d.perAreaByState);
