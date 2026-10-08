@@ -171,7 +171,7 @@
 
     <div class="row-full">
       <div class="panel">
-        <div class="panel-title"><span style="color:var(--amber);">◆</span> Sprint x Status</div>
+        <div class="panel-title"><span style="color:var(--amber);">◆</span> Sprint x Status (User Story)</div>
         <div class="chart-wrap" style="height:220px;"><canvas id="sprintStatusChart"></canvas></div>
       </div>
     </div>
@@ -338,10 +338,13 @@
     autoLoad();
   });
 
+  // Reconhece "Task" e variantes (ex: "Task Design") como mesclável — nunca vira demanda própria
+  function isTaskLike(tipo){ return /^Task\b/.test(tipo || ''); }
+
   function buildDemandas(raw) {
     const tasksByParent = new Map();
     raw.forEach(it => {
-      if (it.Tipo === 'Task') {
+      if (isTaskLike(it.Tipo)) {
         const pid = it.ID_Pai;
         if (!tasksByParent.has(pid)) tasksByParent.set(pid, []);
         tasksByParent.get(pid).push(it);
@@ -349,7 +352,7 @@
     });
     const out = [];
     raw.forEach(it => {
-      if (it.Tipo === 'Task') return; // Task nunca vira demanda própria
+      if (isTaskLike(it.Tipo)) return; // Task e variantes nunca viram demanda própria
       let devs;
       if (it.Tipo === 'Bug') {
         devs = [ it.Responsavel || 'Não atribuído' ];
@@ -556,7 +559,7 @@
     const perAreaByState = {};
     states.forEach(s => { perAreaByState[s] = areas.map(a => filtered.filter(d => d.area===a && d.status===s).length); });
     const perSprintByState = {};
-    states.forEach(s => { perSprintByState[s] = sprints.map(sp => filtered.filter(d => d.sprint===sp && d.status===s).length); });
+    states.forEach(s => { perSprintByState[s] = sprints.map(sp => filtered.filter(d => d.sprint===sp && d.status===s && d.tipo==='User Story').length); });
 
     animateValue(document.getElementById('kpiTotal'), total, 0);
     document.getElementById('kpiTotalSub').textContent = `${sprintsPresent.size} sprint(s) no filtro`;
