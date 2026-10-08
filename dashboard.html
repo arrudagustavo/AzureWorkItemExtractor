@@ -217,6 +217,33 @@
     return colorMap.get(key);
   }
 
+  // Cores fixas por Tipo / Status (como vier na coluna) — cai no palette cíclico se aparecer um valor novo
+  const TIPO_COLORS = {
+    'Bug': '#F43F5E',          // vermelho
+    'User Story': '#2DD4BF',   // verde água
+    'Task': '#22C55E',         // verde
+    'Problema': '#FB923C'      // laranja
+  };
+  const STATUS_COLORS = {
+    'Closed': '#22C55E',            // verde
+    'Active': '#3B82F6',            // azul
+    'Aguardando Deploy': '#8B96A8', // cinza
+    'Homologação': '#FBBF24',       // amarelo
+    'Bloqueado': '#F43F5E',         // vermelho
+    'New': '#F5F5F5',               // branco
+    'Release': '#A855F7',           // roxo
+    'Removed': '#000000'            // preto
+  };
+  function tipoColor(key){ return TIPO_COLORS[key] || colorFor(key); }
+  function statusColor(key){ return STATUS_COLORS[key] || colorFor(key); }
+  function contrastText(hex){
+    const c = String(hex || '').replace('#','');
+    if (c.length < 6) return '#fff';
+    const r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+    const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+    return lum > 0.6 ? '#0A0E17' : '#fff';
+  }
+
   let demandas = [];
   let charts = {};
   let msSprint, msArea, msDev;
@@ -542,29 +569,29 @@
     charts.sprint = new Chart(document.getElementById('sprintChart'), {
       type:'bar',
       data: { labels: d.sprints, datasets: [
-        { label:'Bug', data: d.perSprintBug, backgroundColor: colorFor('Bug'), borderRadius:6 },
-        { label:'User Story', data: d.perSprintUS, backgroundColor: colorFor('User Story'), borderRadius:6 }
+        { label:'Bug', data: d.perSprintBug, backgroundColor: tipoColor('Bug'), borderRadius:6 },
+        { label:'User Story', data: d.perSprintUS, backgroundColor: tipoColor('User Story'), borderRadius:6 }
       ]},
       options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:10}}, datalabels:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}}, x:{grid:{display:false}} } }
     });
 
     charts.status = new Chart(document.getElementById('statusChart'), {
       type:'doughnut',
-      data:{ labels: d.states, datasets:[{data: d.perState, backgroundColor: d.states.map(s=>colorFor(s)), borderWidth:0}] },
+      data:{ labels: d.states, datasets:[{data: d.perState, backgroundColor: d.states.map(s=>statusColor(s)), borderWidth:1, borderColor:'rgba(255,255,255,0.15)'}] },
       options:{ responsive:true, maintainAspectRatio:false, cutout:'60%',
-        plugins:{ legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}, tooltip:{callbacks:{label:pctTooltip}}, datalabels:{color:'#0A0E17', font:{weight:'700',size:11}, formatter:v=>v>0?v:''} } }
+        plugins:{ legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}, tooltip:{callbacks:{label:pctTooltip}}, datalabels:{color: (ctx)=>contrastText(statusColor(d.states[ctx.dataIndex])), font:{weight:'700',size:11}, formatter:v=>v>0?v:''} } }
     });
 
     charts.type = new Chart(document.getElementById('typeChart'), {
       type:'pie',
-      data:{ labels: d.tipos, datasets:[{ data: d.perTipo, backgroundColor: d.tipos.map(t=>colorFor(t)), borderWidth:1, borderColor:'#0A0E17' }] },
+      data:{ labels: d.tipos, datasets:[{ data: d.perTipo, backgroundColor: d.tipos.map(t=>tipoColor(t)), borderWidth:1, borderColor:'#0A0E17' }] },
       options:{ responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}, tooltip:{callbacks:{label:pctTooltip}}, datalabels:{color:'#fff', font:{weight:'700',size:11}, formatter:v=>v>0?v:''} } }
+        plugins:{ legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}, tooltip:{callbacks:{label:pctTooltip}}, datalabels:{color: (ctx)=>contrastText(tipoColor(d.tipos[ctx.dataIndex])), font:{weight:'700',size:11}, formatter:v=>v>0?v:''} } }
     });
 
     charts.areaType = new Chart(document.getElementById('areaTypeChart'), {
       type:'bar',
-      data:{ labels: d.areas, datasets: d.tipos.map(t => ({ label:t, data: d.perAreaByTipo[t], backgroundColor: colorFor(t), borderRadius:4 })) },
+      data:{ labels: d.areas, datasets: d.tipos.map(t => ({ label:t, data: d.perAreaByTipo[t], backgroundColor: tipoColor(t), borderRadius:4 })) },
       options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:9,font:{size:9}}}, datalabels:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}}, x:{grid:{display:false}} } }
     });
 

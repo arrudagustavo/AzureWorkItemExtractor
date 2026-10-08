@@ -456,29 +456,39 @@
                 saveAs(blob, "02_contexto_ia.md");
             } 
             else if (type === 'excel') {
-                const excelData = globalData.map(row => ({
-                    'ID': row.ID,
-                    'Tipo': row.Tipo,
-                    'Título': row.Titulo,
-                    'Status': row.Status,
-                    'Sprint': row.Sprint,
-                    'Responsável': row.Responsavel,
-                    'Tags': row.Tags,
-                    'Pai': row.ID_Pai,
-                    'Criado em': row.Data_Criacao,
-                    'Última Alteração': row.Ultima_Alteracao,
-                    'Dias Ciclo': row.Dias_Ciclo ?? '',
-                    'Comentários': row.Comentarios.map(c => `[${c.data}] ${c.autor}:\n${c.texto}`).join('\n\n'),
-                    'Histórico': row.Historico_Alteracoes.map(h => `[${h.data}] ${h.autor}: ${h.texto}`).join('\n'),
-                    'Anexos': row.Anexos.map(a => a.nome).join('\n'),
-                    'Link': row.URL
-                }));
-                const worksheet = XLSX.utils.json_to_sheet(excelData);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Work Items");
-                const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-                const blob = new Blob([wbout], { type: 'application/octet-stream' });
-                saveAs(blob, "database.xlsx");
+                try {
+                    // Excel trava/corrompe células com mais de 32.767 caracteres - cortamos por segurança
+                    const clip = (str) => {
+                        str = String(str ?? '');
+                        return str.length > 32000 ? str.slice(0, 32000) + '... (truncado)' : str;
+                    };
+                    const excelData = globalData.map(row => ({
+                        'ID': row.ID,
+                        'Tipo': row.Tipo,
+                        'Título': clip(row.Titulo),
+                        'Status': row.Status,
+                        'Sprint': row.Sprint,
+                        'Responsável': row.Responsavel,
+                        'Tags': row.Tags,
+                        'Pai': row.ID_Pai,
+                        'Criado em': row.Data_Criacao,
+                        'Última Alteração': row.Ultima_Alteracao,
+                        'Dias Ciclo': row.Dias_Ciclo ?? '',
+                        'Comentários': clip(row.Comentarios.map(c => `[${c.data}] ${c.autor}:\n${c.texto}`).join('\n\n')),
+                        'Histórico': clip(row.Historico_Alteracoes.map(h => `[${h.data}] ${h.autor}: ${h.texto}`).join('\n')),
+                        'Anexos': clip(row.Anexos.map(a => a.nome).join('\n')),
+                        'Link': row.URL
+                    }));
+                    const worksheet = XLSX.utils.json_to_sheet(excelData);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Work Items");
+                    const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                    const blob = new Blob([wbout], { type: 'application/octet-stream' });
+                    saveAs(blob, "database.xlsx");
+                } catch (err) {
+                    console.error(err);
+                    alert("Erro ao gerar o Excel: " + err.message + "\n\nVeja o console do navegador (F12) para detalhes.");
+                }
             }
         }
 
