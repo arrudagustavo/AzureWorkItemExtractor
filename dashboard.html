@@ -171,6 +171,13 @@
 
     <div class="row-full">
       <div class="panel">
+        <div class="panel-title"><span style="color:var(--amber);">◆</span> Sprint x Status</div>
+        <div class="chart-wrap" style="height:220px;"><canvas id="sprintStatusChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="row-full">
+      <div class="panel">
         <div class="panel-title"><span style="color:var(--cyan);">◆</span> Bugs × User Stories por Sprint</div>
         <div class="chart-wrap" style="height:210px;"><canvas id="sprintChart"></canvas></div>
       </div>
@@ -548,6 +555,8 @@
     tipos.forEach(t => { perAreaByTipo[t] = areas.map(a => filtered.filter(d => d.area===a && d.tipo===t).length); });
     const perAreaByState = {};
     states.forEach(s => { perAreaByState[s] = areas.map(a => filtered.filter(d => d.area===a && d.status===s).length); });
+    const perSprintByState = {};
+    states.forEach(s => { perSprintByState[s] = sprints.map(sp => filtered.filter(d => d.sprint===sp && d.status===s).length); });
 
     animateValue(document.getElementById('kpiTotal'), total, 0);
     document.getElementById('kpiTotalSub').textContent = `${sprintsPresent.size} sprint(s) no filtro`;
@@ -558,7 +567,7 @@
     document.getElementById('kpiDoneSub').textContent = `${total ? Math.round(done.length/total*100) : 0}%`;
     animateValue(document.getElementById('kpiAvgSprint'), avgPerSprint, 1);
 
-    renderCharts({ sprints, areas, tipos, states, perSprintBug, perSprintUS, perState, perTipo, perAreaByTipo, perAreaByState });
+    renderCharts({ sprints, areas, tipos, states, perSprintBug, perSprintUS, perState, perTipo, perAreaByTipo, perAreaByState, perSprintByState });
   }
 
   function renderCharts(d){
@@ -566,6 +575,12 @@
     Chart.defaults.color = '#8B96A8';
     Chart.defaults.font.size = 10;
     destroyCharts();
+
+    charts.sprintStatus = new Chart(document.getElementById('sprintStatusChart'), {
+      type:'bar',
+      data:{ labels: d.sprints, datasets: d.states.map(s => ({ label:s, data: d.perSprintByState[s], backgroundColor: statusColor(s), borderRadius:4 })) },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:9,font:{size:9}}}, datalabels:{color: (ctx)=>contrastText(ctx.dataset.backgroundColor), font:{weight:'700',size:10}, formatter:v=>v>0?v:''}}, scales:{ y:{stacked:true, beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}}, x:{stacked:true, grid:{display:false}} } }
+    });
 
     charts.sprint = new Chart(document.getElementById('sprintChart'), {
       type:'bar',
