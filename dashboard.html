@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard · Produtos Digitais Web</title>
+<style>
+  :root {
+    --bg:#0A0E17; --surface:rgba(255,255,255,0.03); --surface2:#121A2B; --border:rgba(255,255,255,0.08);
+    --cyan:#22D3EE; --blue:#3B82F6; --purple:#A855F7; --green:#22C55E; --red:#F43F5E; --amber:#FBBF24;
+    --text:#E6EDF7; --muted:#8B96A8;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body {
+    background: radial-gradient(circle at 15% 0%, #112042 0%, var(--bg) 45%), radial-gradient(circle at 85% 100%, #1a1030 0%, var(--bg) 50%), var(--bg);
+    color: var(--text); min-height:100vh; padding:20px;
+  }
+  #bgFx { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; opacity:0.35; z-index:0; }
+  #appRoot { position:relative; z-index:1; max-width:1400px; margin:0 auto; }
+
+  .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:10px; flex-wrap:wrap; }
+  a.backlink { font-size:12px; color:var(--muted); text-decoration:none; display:inline-flex; align-items:center; gap:5px; border:1px solid var(--border); padding:6px 12px; border-radius:20px; background:var(--surface); }
+  a.backlink:hover { color:#fff; border-color: rgba(34,211,238,0.4); }
+
+  .status-pill { display:flex; align-items:center; gap:8px; font-size:11px; color:var(--muted); background:var(--surface); border:1px solid var(--border); padding:6px 12px; border-radius:20px; }
+  .status-dot { width:7px; height:7px; border-radius:50%; background:var(--green); flex:0 0 auto; }
+  .status-dot.error { background:var(--red); }
+  #btnRefresh { background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:0 0 0 4px; }
+  #btnRefresh:hover { color:#fff; }
+
+  .header-block { margin-bottom:14px; }
+  .eyebrow { font-size:10px; letter-spacing:3px; color:var(--cyan); font-weight:700; margin-bottom:3px; }
+  .title { font-size:22px; font-weight:800; letter-spacing:0.5px; background:linear-gradient(90deg,#fff,var(--cyan) 60%,var(--blue)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+  /* Loader / empty state */
+  #loadPanel { background:var(--surface); border:1px dashed var(--border); border-radius:12px; padding:28px; text-align:center; margin-bottom:14px; }
+  #loadPanel h3 { color:#fff; font-size:15px; margin-bottom:6px; }
+  #loadPanel p { color:var(--muted); font-size:12px; margin-bottom:14px; }
+  .file-btn { display:inline-flex; align-items:center; gap:8px; background:var(--blue); color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer; }
+  .file-btn:hover { background:#2563EB; }
+  #fileMeta { margin-top:10px; font-size:11px; color:var(--muted); }
+  #fileInput { display:none; }
+
+  #dashContent { display:none; }
+  #dashContent.ready { display:block; }
+
+  #filterBar { display:flex; flex-wrap:nowrap; align-items:center; gap:8px; margin-bottom:12px; background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:8px 10px; }
+  .filter-label { font-size:10px; color:var(--muted); font-weight:700; letter-spacing:1px; white-space:nowrap; flex:0 0 auto; }
+  .date-group { display:flex; align-items:center; gap:5px; flex:0 0 auto; }
+  .date-group input[type="date"] { font-size:11px; padding:5px 6px; border:1px solid var(--border); border-radius:7px; background:#0D1424; color:var(--text); width:120px; }
+  .date-sep { color:var(--muted); font-size:10px; white-space:nowrap; }
+  #btnReset { flex:0 0 auto; margin-left:auto; font-size:11px; padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; white-space:nowrap; }
+  #btnReset:hover { border-color: rgba(244,63,94,0.5); color:#fff; }
+
+  #kpiRow { display:grid; grid-template-columns:repeat(5,1fr); gap:9px; margin-bottom:12px; }
+  .kpi-card { background:var(--surface); backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:12px; padding:11px 13px; position:relative; overflow:hidden; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; min-width:0; }
+  .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: var(--accent); }
+  .kpi-card:hover, .panel:hover { transform: translateY(-2px); border-color: rgba(34,211,238,0.4); box-shadow: 0 10px 30px rgba(34,211,238,0.08); }
+  .kpi-label { font-size:9px; color:var(--muted); font-weight:700; letter-spacing:0.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .kpi-value { font-size:22px; font-weight:800; margin-top:4px; color:#fff; }
+  .kpi-sub { font-size:10px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .row-full { margin-bottom:10px; }
+  .row-split2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+
+  .panel { background:var(--surface); backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:12px; padding:14px; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+  .panel-title { font-size:12px; font-weight:700; color:#fff; margin-bottom:8px; display:flex; align-items:center; gap:5px; }
+  .chart-wrap { position:relative; }
+  .chart-wrap canvas { position:absolute; inset:0; width:100% !important; height:100% !important; }
+
+  #pivotWrap table { width:100%; border-collapse:collapse; font-size:12px; }
+  #pivotWrap th, #pivotWrap td { padding:8px 12px; text-align:right; border-bottom:1px solid var(--border); white-space:nowrap; }
+  #pivotWrap th:first-child, #pivotWrap td:first-child { text-align:left; }
+  #pivotWrap thead th { color:var(--muted); font-weight:700; font-size:10px; letter-spacing:0.5px; border-bottom:1px solid rgba(255,255,255,0.15); }
+  #pivotWrap tbody tr:hover { background:rgba(255,255,255,0.04); }
+  #pivotWrap tbody tr td:first-child { font-weight:600; color:#fff; }
+  #pivotWrap .total-col { color:var(--cyan); font-weight:700; }
+  #pivotWrap .total-row td { font-weight:700; color:#fff; background:rgba(255,255,255,0.05); border-top:1px solid rgba(255,255,255,0.2); }
+  #pivotWrap .zero { color:rgba(230,237,247,0.25); }
+
+  .ms-wrap { position:relative; flex:0 0 auto; }
+  .ms-btn { font-size:11px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:#0D1424; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:5px; white-space:nowrap; }
+  .ms-btn:hover { border-color: rgba(34,211,238,0.5); }
+  .ms-badge { background:var(--cyan); color:#001018; font-size:10px; font-weight:700; padding:1px 6px; border-radius:10px; }
+  .ms-panel { position:absolute; top:calc(100% + 6px); left:0; width:220px; background:#101827; border:1px solid var(--border); border-radius:10px; box-shadow:0 12px 30px rgba(0,0,0,0.5); padding:10px; z-index:200; display:none; }
+  .ms-panel.open { display:block; }
+  .ms-search { width:100%; font-size:12px; padding:6px 8px; border-radius:6px; border:1px solid var(--border); background:#0A0E17; color:var(--text); margin-bottom:8px; box-sizing:border-box; }
+  .ms-actions { display:flex; justify-content:space-between; font-size:11px; color:var(--cyan); margin-bottom:6px; }
+  .ms-actions span { cursor:pointer; }
+  .ms-list { display:flex; flex-direction:column; gap:4px; }
+  .ms-item { display:flex; align-items:center; gap:7px; font-size:12px; padding:4px 6px; border-radius:6px; cursor:pointer; }
+  .ms-item:hover { background:rgba(255,255,255,0.05); }
+
+  @media (max-width: 680px) {
+    .row-split2 { grid-template-columns: 1fr; }
+    #kpiRow { grid-template-columns: repeat(2,1fr); }
+    #filterBar { flex-wrap:wrap; }
+    #btnReset { margin-left:0; width:100%; }
+    .ms-panel { width:100%; left:0; right:0; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bgFx"></canvas>
+
+<div id="appRoot">
+  <div class="topbar">
+    <a class="backlink" href="index.html">← Extrator</a>
+    <div id="statusPill" class="status-pill" style="display:none;">
+      <span id="statusDot" class="status-dot"></span>
+      <span id="statusText">—</span>
+      <button id="btnRefresh" title="Recarregar database.xlsx">⟳</button>
+    </div>
+  </div>
+
+  <div class="header-block">
+    <div class="eyebrow">PRODUTOS DIGITAIS</div>
+    <div class="title">Web · Dashboard de Entregas</div>
+  </div>
+
+  <div id="loadPanel">
+    <h3 id="loadTitle">Carregando base…</h3>
+    <p id="loadText">Buscando <code>database.xlsx</code> neste mesmo local.</p>
+    <button class="file-btn" id="btnManualLoad" style="display:none;" onclick="document.getElementById('fileInput').click()">📂 Carregar arquivo manualmente</button>
+    <input type="file" id="fileInput" accept=".xlsx,application/json">
+    <div id="fileMeta"></div>
+  </div>
+
+  <div id="dashContent">
+    <div id="filterBar">
+      <div class="filter-label">FILTROS</div>
+      <div class="date-group">
+        <input type="date" id="dateFrom">
+        <span class="date-sep">até</span>
+        <input type="date" id="dateTo">
+      </div>
+      <div id="ms-sprint" class="ms-filter"></div>
+      <div id="ms-area" class="ms-filter"></div>
+      <div id="ms-dev" class="ms-filter"></div>
+      <button id="btnReset">✕ Limpar</button>
+    </div>
+
+    <div id="kpiRow">
+      <div class="kpi-card" style="--accent:linear-gradient(90deg,var(--blue),var(--cyan));">
+        <div class="kpi-label">TOTAL DE DEMANDAS</div>
+        <div class="kpi-value"><span class="count" id="kpiTotal">0</span></div>
+        <div class="kpi-sub" id="kpiTotalSub">—</div>
+      </div>
+      <div class="kpi-card" style="--accent:linear-gradient(90deg,var(--red),var(--amber));">
+        <div class="kpi-label">% BUGS</div>
+        <div class="kpi-value"><span class="count" id="kpiBugs">0</span>%</div>
+        <div class="kpi-sub" id="kpiBugsSub">—</div>
+      </div>
+      <div class="kpi-card" style="--accent:linear-gradient(90deg,var(--amber),var(--purple));">
+        <div class="kpi-label">CICLO MÉDIO</div>
+        <div class="kpi-value"><span class="count" id="kpiCycle">0</span>d</div>
+        <div class="kpi-sub">Active → Closed</div>
+      </div>
+      <div class="kpi-card" style="--accent:linear-gradient(90deg,var(--green),var(--cyan));">
+        <div class="kpi-label">CONCLUÍDAS</div>
+        <div class="kpi-value"><span class="count" id="kpiDone">0</span></div>
+        <div class="kpi-sub" id="kpiDoneSub">—</div>
+      </div>
+      <div class="kpi-card" style="--accent:linear-gradient(90deg,var(--purple),var(--blue));">
+        <div class="kpi-label">MÉDIA / SPRINT</div>
+        <div class="kpi-value"><span class="count" id="kpiAvgSprint">0</span></div>
+        <div class="kpi-sub">demandas concluídas</div>
+      </div>
+    </div>
+
+    <div class="row-full">
+      <div class="panel">
+        <div class="panel-title"><span style="color:var(--cyan);">◆</span> Bugs × User Stories por Sprint</div>
+        <div class="chart-wrap" style="height:210px;"><canvas id="sprintChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="row-split2">
+      <div class="panel">
+        <div class="panel-title"><span style="color:var(--purple);">◆</span> Status</div>
+        <div class="chart-wrap" style="height:280px;"><canvas id="statusChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><span style="color:var(--blue);">◆</span> Work Item Type</div>
+        <div class="chart-wrap" style="height:280px;"><canvas id="typeChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="row-full">
+      <div class="panel">
+        <div class="panel-title"><span style="color:var(--green);">◆</span> Área: Work Item Type</div>
+        <div class="chart-wrap" style="height:220px;"><canvas id="areaTypeChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="row-full">
+      <div class="panel">
+        <div class="panel-title"><span style="color:var(--amber);">◆</span> Área x Status</div>
+        <div id="pivotWrap" style="overflow-x:auto;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+(function(){
+  // Paleta cíclica pra categorias dinâmicas (sem nomenclatura fixa — o que vier da coluna define as categorias)
+  const PALETTE = ['#3B82F6','#F43F5E','#FBBF24','#22C55E','#A855F7','#FB923C','#22D3EE','#8B96A8','#EC4899','#84CC16'];
+  const colorMap = new Map();
+  let colorCounter = 0;
+  function colorFor(key){
+    if (!colorMap.has(key)) { colorMap.set(key, PALETTE[colorCounter % PALETTE.length]); colorCounter++; }
+    return colorMap.get(key);
+  }
+
+  let demandas = [];
+  let charts = {};
+  let msSprint, msArea, msDev;
+  let datalabelsReady = false;
+
+  // ---------- Carregamento automático de database.xlsx (com fallback manual) ----------
+  const DATA_FILE = 'database.xlsx';
+
+  async function autoLoad(){
+    setLoadState('loading', `Buscando ${DATA_FILE} neste mesmo local...`);
+    try {
+      const res = await fetch(DATA_FILE, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buf = await res.arrayBuffer();
+      const rows = parseXlsx(buf);
+      loadRows(rows, `${DATA_FILE} (${rows.length} linhas)`);
+    } catch (err) {
+      setLoadState('error', `Não encontrei ${DATA_FILE} aqui (${err.message}). Se você estiver testando localmente (abrindo o arquivo direto, sem servidor), isso é esperado — use o carregamento manual abaixo. No GitHub Pages isso deve carregar sozinho.`);
+      document.getElementById('btnManualLoad').style.display = 'inline-flex';
+    }
+  }
+
+  function parseXlsx(arrayBuffer){
+    const wb = XLSX.read(arrayBuffer, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const sheetRows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    return sheetRows.map(r => ({
+      ID: r['ID'],
+      Tipo: r['Tipo'],
+      Titulo: r['Título'],
+      Status: r['Status'],
+      Sprint: r['Sprint'],
+      Responsavel: r['Responsável'],
+      Tags: r['Tags'],
+      ID_Pai: r['Pai'],
+      Data_Criacao: r['Criado em'],
+      Dias_Ciclo: r['Dias Ciclo'] === '' || r['Dias Ciclo'] == null ? null : Number(r['Dias Ciclo'])
+    }));
+  }
+
+  function setLoadState(kind, text){
+    document.getElementById('loadTitle').textContent = kind === 'loading' ? 'Carregando base…' : kind === 'error' ? 'Não foi possível carregar automaticamente' : 'Base carregada';
+    document.getElementById('loadText').innerHTML = text;
+  }
+
+  function loadRows(raw, sourceLabel){
+    demandas = buildDemandas(raw);
+    document.getElementById('loadPanel').style.display = 'none';
+    document.getElementById('fileMeta').textContent = '';
+    const pill = document.getElementById('statusPill');
+    pill.style.display = 'flex';
+    document.getElementById('statusDot').className = 'status-dot';
+    document.getElementById('statusText').textContent = `${sourceLabel} — ${demandas.length} demandas — atualizado ${new Date().toLocaleTimeString('pt-BR')}`;
+    setupFilters();
+    document.getElementById('dashContent').classList.add('ready');
+    recompute();
+  }
+
+  document.getElementById('fileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        let raw;
+        if (file.name.toLowerCase().endsWith('.json')) {
+          raw = JSON.parse(ev.target.result);
+        } else {
+          raw = parseXlsx(ev.target.result);
+        }
+        loadRows(raw, file.name);
+      } catch (err) {
+        document.getElementById('fileMeta').textContent = 'Erro ao ler o arquivo: ' + err.message;
+      }
+    };
+    if (file.name.toLowerCase().endsWith('.json')) reader.readAsText(file);
+    else reader.readAsArrayBuffer(file);
+  });
+
+  document.getElementById('btnRefresh').addEventListener('click', () => {
+    document.getElementById('loadPanel').style.display = 'block';
+    document.getElementById('btnManualLoad').style.display = 'none';
+    document.getElementById('statusPill').style.display = 'none';
+    autoLoad();
+  });
+
+  function buildDemandas(raw) {
+    const tasksByParent = new Map();
+    raw.forEach(it => {
+      if (it.Tipo === 'Task') {
+        const pid = it.ID_Pai;
+        if (!tasksByParent.has(pid)) tasksByParent.set(pid, []);
+        tasksByParent.get(pid).push(it);
+      }
+    });
+    const out = [];
+    raw.forEach(it => {
+      if (it.Tipo === 'Task') return; // Task nunca vira demanda própria
+      let devs;
+      if (it.Tipo === 'Bug') {
+        devs = [ it.Responsavel || 'Não atribuído' ];
+      } else {
+        const children = tasksByParent.get(it.ID) || [];
+        devs = children.length
+          ? Array.from(new Set(children.map(t => t.Responsavel || 'Não atribuído')))
+          : [ it.Responsavel || 'Não atribuído' ];
+      }
+      out.push({
+        id: it.ID,
+        tipo: it.Tipo,
+        titulo: it.Titulo,
+        status: it.Status,
+        sprint: it.Sprint || '(sem sprint)',
+        area: it.Tags || '(sem tag)',
+        devs,
+        created: it.Data_Criacao ? new Date(it.Data_Criacao) : null,
+        cycle: it.Status === 'Closed' ? (it.Dias_Ciclo ?? null) : null
+      });
+    });
+    return out;
+  }
+
+  function naturalSortSprints(list) {
+    return [...list].sort((a, b) => {
+      const na = parseInt((a.match(/\d+/) || [0])[0], 10);
+      const nb = parseInt((b.match(/\d+/) || [0])[0], 10);
+      return na !== nb ? na - nb : a.localeCompare(b);
+    });
+  }
+
+  // ---------- Filtros dinâmicos (multiselect estilo Excel) ----------
+  function createMultiSelect(containerId, label, options){
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    const selected = new Set(options);
+    const wrap = document.createElement('div');
+    wrap.className = 'ms-wrap';
+    const btn = document.createElement('button');
+    btn.className = 'ms-btn';
+    wrap.appendChild(btn);
+    const panel = document.createElement('div');
+    panel.className = 'ms-panel';
+    panel.innerHTML = `
+      <input class="ms-search" placeholder="Buscar ${label.toLowerCase()}...">
+      <div class="ms-actions"><span data-act="all">Marcar todos</span><span data-act="none">Limpar</span></div>
+      <div class="ms-list"></div>
+    `;
+    wrap.appendChild(panel);
+    container.appendChild(wrap);
+
+    const list = panel.querySelector('.ms-list');
+    function renderList(filterTxt){
+      list.innerHTML = '';
+      options.filter(o => !filterTxt || o.toLowerCase().includes(filterTxt.toLowerCase())).forEach(opt => {
+        const row = document.createElement('label');
+        row.className = 'ms-item';
+        row.innerHTML = `<input type="checkbox" ${selected.has(opt)?'checked':''}> <span>${opt}</span>`;
+        row.querySelector('input').addEventListener('change', e => {
+          if (e.target.checked) selected.add(opt); else selected.delete(opt);
+          updateBtn();
+          recompute();
+        });
+        list.appendChild(row);
+      });
+    }
+    function updateBtn(){
+      const all = selected.size === options.length;
+      btn.innerHTML = all ? `${label} <span style="color:var(--muted);">(Todos)</span>` : `${label} <span class="ms-badge">${selected.size}</span>`;
+    }
+    panel.querySelector('.ms-search').addEventListener('input', e => renderList(e.target.value));
+    panel.querySelector('[data-act="all"]').addEventListener('click', () => { options.forEach(o=>selected.add(o)); renderList(panel.querySelector('.ms-search').value); updateBtn(); recompute(); });
+    panel.querySelector('[data-act="none"]').addEventListener('click', () => { selected.clear(); renderList(panel.querySelector('.ms-search').value); updateBtn(); recompute(); });
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.ms-panel.open').forEach(p => { if (p!==panel) p.classList.remove('open'); });
+      panel.classList.toggle('open');
+    });
+    document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) panel.classList.remove('open'); });
+
+    renderList('');
+    updateBtn();
+    return { getSelected: () => selected, reset: () => { selected.clear(); options.forEach(o=>selected.add(o)); renderList(''); updateBtn(); } };
+  }
+
+  function setupFilters(){
+    const sprints = naturalSortSprints(Array.from(new Set(demandas.map(d => d.sprint))));
+    const areas = Array.from(new Set(demandas.map(d => d.area))).sort();
+    const devs = Array.from(new Set(demandas.flatMap(d => d.devs))).sort();
+
+    msSprint = createMultiSelect('ms-sprint', 'Sprint', sprints);
+    msArea = createMultiSelect('ms-area', 'Área', areas);
+    msDev = createMultiSelect('ms-dev', 'Dev', devs);
+
+    const dates = demandas.map(d => d.created).filter(Boolean);
+    const minDate = dates.length ? new Date(Math.min(...dates)) : new Date();
+    const maxDate = dates.length ? new Date(Math.max(...dates)) : new Date();
+    const fmt = d => d.toISOString().slice(0,10);
+    const dFrom = document.getElementById('dateFrom'), dTo = document.getElementById('dateTo');
+    dFrom.min = fmt(minDate); dFrom.max = fmt(maxDate); dFrom.value = fmt(minDate);
+    dTo.min = fmt(minDate); dTo.max = fmt(maxDate); dTo.value = fmt(maxDate);
+    dFrom.addEventListener('change', recompute);
+    dTo.addEventListener('change', recompute);
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      dFrom.value = fmt(minDate); dTo.value = fmt(maxDate);
+      msSprint.reset(); msArea.reset(); msDev.reset();
+      recompute();
+    });
+  }
+
+  function animateValue(el, target, decimals){
+    const dur = 700; const start = performance.now();
+    const from = parseFloat(el.textContent.replace(',','.')) || 0;
+    function step(now){
+      const p = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const val = from + (target - from) * eased;
+      el.textContent = decimals ? val.toFixed(decimals).replace('.', ',') : Math.round(val).toString();
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function renderPivot(areas, states, perAreaByState){
+    const wrap = document.getElementById('pivotWrap');
+    const stateTotals = states.map(s => perAreaByState[s].reduce((a,b)=>a+b,0));
+    const grandTotal = stateTotals.reduce((a,b)=>a+b,0);
+    let html = '<table><thead><tr><th>Área</th>';
+    states.forEach(s => html += `<th>${s}</th>`);
+    html += '<th class="total-col">Total</th></tr></thead><tbody>';
+    areas.forEach((area, ai) => {
+      let rowTotal = 0;
+      html += `<tr><td>${area}</td>`;
+      states.forEach(s => {
+        const v = perAreaByState[s][ai];
+        rowTotal += v;
+        html += `<td class="${v===0?'zero':''}">${v}</td>`;
+      });
+      html += `<td class="total-col">${rowTotal}</td></tr>`;
+    });
+    html += '<tr class="total-row"><td>Total</td>';
+    stateTotals.forEach(v => html += `<td>${v}</td>`);
+    html += `<td class="total-col">${grandTotal}</td></tr>`;
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+  }
+
+  function pctTooltip(ctx){
+    const ds = ctx.dataset.data;
+    const total = ds.reduce((a,b)=>a+b,0);
+    const val = ctx.raw;
+    const pct = total ? (val/total*100).toFixed(1) : 0;
+    return `${ctx.label}: ${val} (${pct}%)`;
+  }
+
+  function destroyCharts(){
+    Object.values(charts).forEach(c => c && c.destroy());
+    charts = {};
+  }
+
+  function parseLocalDate(value, endOfDay){
+    const [y, m, d] = value.split('-').map(Number);
+    return endOfDay ? new Date(y, m-1, d, 23,59,59,999) : new Date(y, m-1, d, 0,0,0,0);
+  }
+
+  function recompute(){
+    if (!demandas.length) return;
+    if (!window.Chart) { setTimeout(recompute, 100); return; }
+    const from = parseLocalDate(document.getElementById('dateFrom').value, false);
+    const to = parseLocalDate(document.getElementById('dateTo').value, true);
+    const selSprints = msSprint.getSelected();
+    const selAreas = msArea.getSelected();
+    const selDevs = msDev.getSelected();
+
+    const filtered = demandas.filter(d =>
+      (!d.created || (d.created >= from && d.created <= to)) &&
+      selSprints.has(d.sprint) &&
+      selAreas.has(d.area) &&
+      d.devs.some(dv => selDevs.has(dv))
+    );
+
+    const sprints = naturalSortSprints(Array.from(new Set(demandas.map(d => d.sprint))));
+    const areas = Array.from(new Set(demandas.map(d => d.area))).sort();
+    const tipos = Array.from(new Set(demandas.map(d => d.tipo))).sort();
+    const states = Array.from(new Set(demandas.map(d => d.status))).sort();
+
+    const total = filtered.length;
+    const bugs = filtered.filter(d => d.tipo === 'Bug').length;
+    const done = filtered.filter(d => d.status === 'Closed');
+    const cycleVals = done.map(d => d.cycle).filter(v => v != null);
+    const avgCycle = cycleVals.length ? cycleVals.reduce((a,b)=>a+b,0)/cycleVals.length : 0;
+
+    const sprintsPresent = new Set(filtered.map(d => d.sprint));
+    const avgPerSprint = sprintsPresent.size ? done.length / sprintsPresent.size : 0;
+
+    const perSprintBug = sprints.map(s => filtered.filter(d => d.sprint===s && d.tipo==='Bug').length);
+    const perSprintUS = sprints.map(s => filtered.filter(d => d.sprint===s && d.tipo==='User Story').length);
+    const perState = states.map(s => filtered.filter(d => d.status===s).length);
+    const perTipo = tipos.map(t => filtered.filter(d => d.tipo===t).length);
+    const perAreaByTipo = {};
+    tipos.forEach(t => { perAreaByTipo[t] = areas.map(a => filtered.filter(d => d.area===a && d.tipo===t).length); });
+    const perAreaByState = {};
+    states.forEach(s => { perAreaByState[s] = areas.map(a => filtered.filter(d => d.area===a && d.status===s).length); });
+
+    animateValue(document.getElementById('kpiTotal'), total, 0);
+    document.getElementById('kpiTotalSub').textContent = `${sprintsPresent.size} sprint(s) no filtro`;
+    animateValue(document.getElementById('kpiBugs'), total ? Math.round(bugs/total*100) : 0, 0);
+    document.getElementById('kpiBugsSub').textContent = `${bugs} de ${total} demandas`;
+    animateValue(document.getElementById('kpiCycle'), avgCycle, 1);
+    animateValue(document.getElementById('kpiDone'), done.length, 0);
+    document.getElementById('kpiDoneSub').textContent = `${total ? Math.round(done.length/total*100) : 0}%`;
+    animateValue(document.getElementById('kpiAvgSprint'), avgPerSprint, 1);
+
+    renderCharts({ sprints, areas, tipos, states, perSprintBug, perSprintUS, perState, perTipo, perAreaByTipo, perAreaByState });
+  }
+
+  function renderCharts(d){
+    if (window.ChartDataLabels && !datalabelsReady) { Chart.register(ChartDataLabels); datalabelsReady = true; }
+    Chart.defaults.color = '#8B96A8';
+    Chart.defaults.font.size = 10;
+    destroyCharts();
+
+    charts.sprint = new Chart(document.getElementById('sprintChart'), {
+      type:'bar',
+      data: { labels: d.sprints, datasets: [
+        { label:'Bug', data: d.perSprintBug, backgroundColor: colorFor('Bug'), borderRadius:6 },
+        { label:'User Story', data: d.perSprintUS, backgroundColor: colorFor('User Story'), borderRadius:6 }
+      ]},
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:10}}, datalabels:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}}, x:{grid:{display:false}} } }
+    });
+
+    charts.status = new Chart(document.getElementById('statusChart'), {
+      type:'doughnut',
+      data:{ labels: d.states, datasets:[{data: d.perState, backgroundColor: d.states.map(s=>colorFor(s)), borderWidth:0}] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'60%',
+        plugins:{ legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}, tooltip:{callbacks:{label:pctTooltip}}, datalabels:{color:'#0A0E17', font:{weight:'700',size:11}, formatter:v=>v>0?v:''} } }
+    });
+
+    charts.type = new Chart(document.getElementById('typeChart'), {
+      type:'pie',
+      data:{ labels: d.tipos, datasets:[{ data: d.perTipo, backgroundColor: d.tipos.map(t=>colorFor(t)), borderWidth:1, borderColor:'#0A0E17' }] },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}, tooltip:{callbacks:{label:pctTooltip}}, datalabels:{color:'#fff', font:{weight:'700',size:11}, formatter:v=>v>0?v:''} } }
+    });
+
+    charts.areaType = new Chart(document.getElementById('areaTypeChart'), {
+      type:'bar',
+      data:{ labels: d.areas, datasets: d.tipos.map(t => ({ label:t, data: d.perAreaByTipo[t], backgroundColor: colorFor(t), borderRadius:4 })) },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:9,font:{size:9}}}, datalabels:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}}, x:{grid:{display:false}} } }
+    });
+
+    renderPivot(d.areas, d.states, d.perAreaByState);
+  }
+
+  function bgFx(){
+    const canvas = document.getElementById('bgFx');
+    const ctx = canvas.getContext('2d');
+    let w,h,particles;
+    function resize(){ w = canvas.width = canvas.offsetWidth; h = canvas.height = canvas.offsetHeight; }
+    function init(){ resize(); particles = Array.from({length:26},() => ({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-0.5)*0.2,vy:(Math.random()-0.5)*0.2,r:Math.random()*1.6+0.6})); }
+    function draw(){
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle='rgba(34,211,238,0.5)';
+      particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>w)p.vx*=-1; if(p.y<0||p.y>h)p.vy*=-1; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); });
+      for(let i=0;i<particles.length;i++) for(let j=i+1;j<particles.length;j++){ const a=particles[i],b=particles[j]; const dist=Math.hypot(a.x-b.x,a.y-b.y); if(dist<100){ ctx.strokeStyle=`rgba(59,130,246,${0.1*(1-dist/100)})`; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); } }
+      requestAnimationFrame(draw);
+    }
+    init(); window.addEventListener('resize', resize); draw();
+  }
+  bgFx();
+  autoLoad();
+})();
+</script>
+</body>
+</html>

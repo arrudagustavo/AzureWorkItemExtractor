@@ -6,7 +6,7 @@
     <title>Azure Work Item Extractor</title>
     <!-- Bibliotecas JS para Markdown e Excel -->
     <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             /* Cores padrão do Azure DevOps */
@@ -33,6 +33,16 @@
         button { background-color: var(--az-blue); color: white; border: none; padding: 10px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         button:hover { background-color: var(--az-blue-hover); }
         button:disabled { background-color: #A19F9D; cursor: not-allowed; }
+
+        .dash-link-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            text-align: center; text-decoration: none;
+            background: linear-gradient(90deg, #0A0E17, #15213A);
+            color: #fff; border: 1px solid #22D3EE; padding: 10px; border-radius: 4px;
+            font-weight: 600; font-size: 13px; transition: filter 0.2s;
+            margin-top: auto;
+        }
+        .dash-link-btn:hover { filter: brightness(1.2); }
 
         /* Main Content */
         .main-content { flex: 1; display: flex; flex-direction: column; background-color: var(--az-surface); margin: 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; }
@@ -99,8 +109,10 @@
             <input type="number" id="maxItems" value="1000" min="1" max="1000">
         </div>
         <button id="btnRun" onclick="runExtraction()">Iniciar Extração</button>
-        
+
         <div class="log-box" id="logBox">Aguardando início...</div>
+
+        <a class="dash-link-btn" href="dashboard.html">📊 Dashboard Produtos Digitais - Web</a>
     </div>
 
     <div class="main-content">
@@ -148,6 +160,24 @@
         });
         
         let globalData = [];
+
+        function computeCycleDays(historicoList, currentStatus) {
+            if (currentStatus !== 'Closed' || !historicoList.length) return null;
+            let activeDate = null, closedDate = null;
+            // historicoList vem ordenado do mais novo pro mais antigo
+            for (let i = historicoList.length - 1; i >= 0; i--) {
+                const m = /Status:\s*.*?➔\s*([^|]+)/.exec(historicoList[i].texto || '');
+                if (m && !activeDate && m[1].trim() === 'Active') activeDate = new Date(historicoList[i].data);
+            }
+            for (let i = 0; i < historicoList.length; i++) {
+                const m = /Status:\s*.*?➔\s*([^|]+)/.exec(historicoList[i].texto || '');
+                if (m && !closedDate && m[1].trim() === 'Closed') closedDate = new Date(historicoList[i].data);
+            }
+            if (activeDate && closedDate && closedDate > activeDate) {
+                return Math.round((closedDate - activeDate) / 86400000 * 10) / 10;
+            }
+            return null;
+        }
 
         function log(msg) {
             const box = document.getElementById('logBox');
@@ -299,6 +329,7 @@
                     Data_Criacao: fields['System.CreatedDate'] || '',
                     Ultima_Alteracao: fields['System.ChangedDate'] || '',
                     ID_Pai: fields['System.Parent'] || 'Nenhum',
+                    Dias_Ciclo: computeCycleDays(historicoList, fields['System.State']),
                     Anexos: anexos,
                     Descricao_MD: descMd,
                     Comentarios: comentariosList, // Comentários agora vêm antes no objeto JSON
@@ -425,17 +456,27 @@
                 saveAs(blob, "02_contexto_ia.md");
             } 
             else if (type === 'excel') {
-                const excelData = globalData.map(row => {
-                    const r = { ...row };
-                    r.Comentarios = r.Comentarios.map(c => `[${c.data}] ${c.autor}:\n${c.texto}`).join('\n\n');
-                    r.Historico_Alteracoes = r.Historico_Alteracoes.map(h => `[${h.data}] ${h.autor}: ${h.texto}`).join('\n');
-                    r.Anexos = r.Anexos.map(a => a.nome).join('\n');
-                    return r;
-                });
+                const excelData = globalData.map(row => ({
+                    'ID': row.ID,
+                    'Tipo': row.Tipo,
+                    'Título': row.Titulo,
+                    'Status': row.Status,
+                    'Sprint': row.Sprint,
+                    'Responsável': row.Responsavel,
+                    'Tags': row.Tags,
+                    'Pai': row.ID_Pai,
+                    'Criado em': row.Data_Criacao,
+                    'Última Alteração': row.Ultima_Alteracao,
+                    'Dias Ciclo': row.Dias_Ciclo ?? '',
+                    'Comentários': row.Comentarios.map(c => `[${c.data}] ${c.autor}:\n${c.texto}`).join('\n\n'),
+                    'Histórico': row.Historico_Alteracoes.map(h => `[${h.data}] ${h.autor}: ${h.texto}`).join('\n'),
+                    'Anexos': row.Anexos.map(a => a.nome).join('\n'),
+                    'Link': row.URL
+                }));
                 const worksheet = XLSX.utils.json_to_sheet(excelData);
                 const workbook = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Work Items");
-                XLSX.writeFile(workbook, "03_dados_planilha.xlsx");
+                XLSX.writeFile(workbook, "database.xlsx");
             }
         }
 
