@@ -161,8 +161,8 @@
         
         let globalData = [];
 
-        function computeCycleDays(historicoList, currentStatus) {
-            if (currentStatus !== 'Closed' || !historicoList.length) return null;
+        function computeCycleDays(historicoList, currentStatus, dataCriacao, ultimaAlteracao) {
+            if (currentStatus !== 'Closed') return null;
             let activeDate = null, closedDate = null;
             // historicoList vem ordenado do mais novo pro mais antigo
             for (let i = historicoList.length - 1; i >= 0; i--) {
@@ -173,6 +173,11 @@
                 const m = /Status:\s*.*?➔\s*([^|]+)/.exec(historicoList[i].texto || '');
                 if (m && !closedDate && m[1].trim() === 'Closed') closedDate = new Date(historicoList[i].data);
             }
+            // Fallbacks pra quando o histórico de updates não trouxe a transição exata:
+            // sem "Active" registrado (ex: criado e fechado direto) usa a data de criação;
+            // sem "Closed" registrado usa a última alteração do item.
+            if (!activeDate && dataCriacao) activeDate = new Date(dataCriacao);
+            if (!closedDate && ultimaAlteracao) closedDate = new Date(ultimaAlteracao);
             if (activeDate && closedDate && closedDate > activeDate) {
                 return Math.round((closedDate - activeDate) / 86400000 * 10) / 10;
             }
@@ -329,7 +334,7 @@
                     Data_Criacao: fields['System.CreatedDate'] || '',
                     Ultima_Alteracao: fields['System.ChangedDate'] || '',
                     ID_Pai: fields['System.Parent'] || 'Nenhum',
-                    Dias_Ciclo: computeCycleDays(historicoList, fields['System.State']),
+                    Dias_Ciclo: computeCycleDays(historicoList, fields['System.State'], fields['System.CreatedDate'], fields['System.ChangedDate']),
                     Anexos: anexos,
                     Descricao_MD: descMd,
                     Comentarios: comentariosList, // Comentários agora vêm antes no objeto JSON
