@@ -334,6 +334,7 @@
                     Data_Criacao: fields['System.CreatedDate'] || '',
                     Ultima_Alteracao: fields['System.ChangedDate'] || '',
                     ID_Pai: fields['System.Parent'] || 'Nenhum',
+                    Story_Points: fields['Microsoft.VSTS.Scheduling.StoryPoints'] ?? fields['Microsoft.VSTS.Scheduling.Effort'] ?? fields['Microsoft.VSTS.Scheduling.Size'] ?? '',
                     Dias_Ciclo: computeCycleDays(historicoList, fields['System.State'], fields['System.CreatedDate'], fields['System.ChangedDate']),
                     Anexos: anexos,
                     Descricao_MD: descMd,
@@ -363,6 +364,7 @@
                 md += `### Metadados\n`;
                 md += `- **Status Atual:** ${item.Status}\n- **Responsável:** ${item.Responsavel}\n`;
                 md += `- **Sprint:** ${item.Sprint}\n- **Tags:** ${item.Tags}\n- **Item Pai:** ${item.ID_Pai}\n`;
+                md += `- **Story Points:** ${item.Story_Points !== '' ? item.Story_Points : 'Não definido'}\n`;
                 md += `- **Criado em:** ${item.Data_Criacao}\n- **Última Atualização:** ${item.Ultima_Alteracao}\n`;
                 
                 if (item.Anexos.length > 0) {
@@ -415,6 +417,7 @@
                 { key: 'Responsavel', label: 'Responsável' },
                 { key: 'Tags', label: 'Tags', truncate: true },
                 { key: 'ID_Pai', label: 'Pai' },
+                { key: 'Story_Points', label: 'Story Points' },
                 { key: 'Data_Criacao', label: 'Criado em' },
                 { key: 'Ultima_Alteracao', label: 'Última Alteração' },
             ];
@@ -476,6 +479,7 @@
                         'Responsável': row.Responsavel,
                         'Tags': row.Tags,
                         'Pai': row.ID_Pai,
+                        'Story Points': row.Story_Points ?? '',
                         'Criado em': row.Data_Criacao,
                         'Última Alteração': row.Ultima_Alteracao,
                         'Dias Ciclo': row.Dias_Ciclo ?? '',
