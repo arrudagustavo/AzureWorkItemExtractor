@@ -6,6 +6,7 @@ const ORG = 'lamoda';
 const PROJETO = 'Digital';
 const RESPONSAVEL = 'gustavo.arruda@lamoda.com.br';
 const TIPOS_PAI = ['User Story', 'User Story Design', 'Problema'];
+const ITERACAO_FORA = 'Digital\\Backlog - Web';
 const ARQUIVO = process.env.ARQUIVO_SAIDA || 'database.json';
 const PAT = process.env.AZDO_PAT;
 
@@ -49,7 +50,8 @@ function wiql(query) {
 }
 
 const filtroPais = (prefixo) => `${prefixo}[System.WorkItemType] IN (${TIPOS_PAI.map(t => `'${t}'`).join(', ')})
-  AND ${prefixo}[System.AssignedTo] = '${RESPONSAVEL}'`;
+  AND ${prefixo}[System.AssignedTo] = '${RESPONSAVEL}'
+  AND ${prefixo}[System.IterationPath] <> '${ITERACAO_FORA}'`;
 
 async function buscarIdsPais() {
   const r = await wiql(`SELECT [System.Id] FROM WorkItems
