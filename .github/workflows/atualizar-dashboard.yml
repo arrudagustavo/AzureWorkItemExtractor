@@ -1,0 +1,43 @@
+name: Atualizar Dashboard
+
+on:
+  schedule:
+    - cron: '0 12,19 * * *'   # 12:00 e 19:00 UTC = 09:00 e 16:00 em Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: atualizar-dashboard
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ARQUIVO_SAIDA: database-teste.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Consultar Azure DevOps e gerar arquivo
+        run: node scripts/atualizar-database.mjs
+        env:
+          AZDO_PAT: ${{ secrets.AZDO_PAT }}
+
+      - name: Commit e push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$ARQUIVO_SAIDA"
+          if git diff --cached --quiet; then
+            echo "Sem mudanças para commitar."
+            exit 0
+          fi
+          git commit -m "dados: atualização automática"
+          git push || (git pull --rebase && git push)
