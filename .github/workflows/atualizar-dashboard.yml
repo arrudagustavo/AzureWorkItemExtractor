@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      ARQUIVO_SAIDA: database-teste.json
+      ARQUIVO_SAIDA: database.json
     steps:
       - uses: actions/checkout@v4
 
