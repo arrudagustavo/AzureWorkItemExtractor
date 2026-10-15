@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-10-15T16:37:52.597Z",
+  "geradoEm": "2026-10-15T16:48:47.826Z",
   "itens": [
     {
       "ID": 9906,
@@ -727,12 +727,12 @@
       "Titulo": "Protótipo navegável para apresentação",
       "Status": "Closed",
       "Sprint": "Digital\\Sprint 31-2026",
-      "Responsavel": "Não atribuído",
-      "Tags": "",
+      "Responsavel": "Istvan de França",
+      "Tags": "UX",
       "ID_Pai": 11635,
       "Story_Points": null,
       "Data_Criacao": "2026-03-30T16:38:48.257Z",
-      "Ultima_Alteracao": "2026-03-30T17:56:22.613Z",
+      "Ultima_Alteracao": "2026-10-15T16:46:57.92Z",
       "Dias_Ciclo": 0.1,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/12088"
     },
@@ -742,12 +742,12 @@
       "Titulo": "Apresentação para time de e-comm",
       "Status": "Closed",
       "Sprint": "Digital\\Sprint 31-2026",
-      "Responsavel": "Não atribuído",
-      "Tags": "",
+      "Responsavel": "Istvan de França",
+      "Tags": "UX",
       "ID_Pai": 11635,
       "Story_Points": null,
       "Data_Criacao": "2026-03-30T16:39:03.38Z",
-      "Ultima_Alteracao": "2026-03-30T17:56:23.483Z",
+      "Ultima_Alteracao": "2026-10-15T16:47:02.61Z",
       "Dias_Ciclo": 0.1,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/12089"
     },
