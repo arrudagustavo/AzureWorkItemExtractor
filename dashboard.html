@@ -44,12 +44,29 @@
   #dashContent { display:none; }
   #dashContent.ready { display:block; }
 
-  #filterBar { display:flex; flex-wrap:nowrap; align-items:center; gap:8px; margin-bottom:12px; background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:8px 10px; }
-  .filter-label { font-size:10px; color:var(--muted); font-weight:700; letter-spacing:1px; white-space:nowrap; flex:0 0 auto; }
-  .date-group { display:flex; align-items:center; gap:5px; flex:0 0 auto; }
-  .date-group input[type="date"] { font-size:11px; padding:5px 6px; border:1px solid var(--border); border-radius:7px; background:#0D1424; color:var(--text); width:120px; }
-  .date-sep { color:var(--muted); font-size:10px; white-space:nowrap; }
-  #btnReset { flex:0 0 auto; margin-left:auto; font-size:11px; padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; white-space:nowrap; }
+  #filterBar { display:flex; flex-wrap:nowrap; align-items:center; gap:9px; margin-bottom:12px; background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:9px 11px; }
+  .filter-label { font-size:11px; color:var(--muted); font-weight:700; letter-spacing:1px; white-space:nowrap; flex:0 0 auto; }
+  .date-group { display:flex; align-items:center; gap:6px; flex:0 0 auto; }
+  .dp-wrap { position:relative; }
+  .dp-input { font-size:12.1px; padding:6px 28px 6px 9px; border:1px solid var(--border); border-radius:8px; color:var(--text); width:132px; cursor:pointer;
+    background:#0D1424 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238B96A8' stroke-width='2'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E") no-repeat right 8px center / 14px; }
+  .dp-input:hover, .dp-input:focus { border-color: rgba(34,211,238,0.5); outline:none; }
+  .dp-pop { position:absolute; top:calc(100% + 6px); left:0; width:262px; background:#101827; border:1px solid var(--border); border-radius:11px; box-shadow:0 12px 30px rgba(0,0,0,0.5); padding:11px; z-index:200; display:none; }
+  .dp-pop.open { display:block; }
+  .dp-head { display:flex; align-items:center; gap:6px; margin-bottom:9px; }
+  .dp-nav { flex:0 0 auto; width:28px; height:28px; border-radius:7px; border:1px solid var(--border); background:none; color:var(--text); font-size:15px; cursor:pointer; }
+  .dp-nav:hover { border-color: rgba(34,211,238,0.5); }
+  .dp-head select { flex:1; min-width:0; font-size:12.1px; padding:5px 6px; border-radius:7px; border:1px solid var(--border); background:#0A0E17; color:var(--text); color-scheme:dark; cursor:pointer; }
+  .dp-head .dp-mes { flex:1.6; }
+  .dp-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; text-align:center; }
+  .dp-dow { font-size:11px; color:var(--muted); font-weight:700; padding:4px 0; }
+  .dp-day { font-size:12.1px; padding:6px 0; border-radius:7px; border:none; background:none; color:var(--text); cursor:pointer; }
+  .dp-day:hover { background:rgba(255,255,255,0.08); }
+  .dp-day.out { color:rgba(230,237,247,0.3); }
+  .dp-day.today { box-shadow: inset 0 0 0 1px rgba(34,211,238,0.5); }
+  .dp-day.sel { background:var(--cyan); color:#001018; font-weight:700; }
+  .date-sep { color:var(--muted); font-size:11px; white-space:nowrap; }
+  #btnReset { flex:0 0 auto; margin-left:auto; font-size:12.1px; padding:7px 13px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; white-space:nowrap; }
   #btnReset:hover { border-color: rgba(244,63,94,0.5); color:#fff; }
 
   #kpiRow { display:grid; grid-template-columns:repeat(6,1fr); gap:9px; margin-bottom:12px; }
@@ -79,16 +96,17 @@
   #pivotWrap .zero { color:rgba(230,237,247,0.25); }
 
   .ms-wrap { position:relative; flex:0 0 auto; }
-  .ms-btn { font-size:11px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:#0D1424; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:5px; white-space:nowrap; }
+  .ms-btn { font-size:12.1px; padding:7px 11px; border-radius:8px; border:1px solid var(--border); background:#0D1424; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:6px; white-space:nowrap; }
   .ms-btn:hover { border-color: rgba(34,211,238,0.5); }
-  .ms-badge { background:var(--cyan); color:#001018; font-size:10px; font-weight:700; padding:1px 6px; border-radius:10px; }
-  .ms-panel { position:absolute; top:calc(100% + 6px); left:0; width:220px; background:#101827; border:1px solid var(--border); border-radius:10px; box-shadow:0 12px 30px rgba(0,0,0,0.5); padding:10px; z-index:200; display:none; }
+  .ms-badge { background:var(--cyan); color:#001018; font-size:11px; font-weight:700; padding:1px 7px; border-radius:11px; }
+  .ms-panel { position:absolute; top:calc(100% + 6px); left:0; width:242px; background:#101827; border:1px solid var(--border); border-radius:11px; box-shadow:0 12px 30px rgba(0,0,0,0.5); padding:11px; z-index:200; display:none; }
   .ms-panel.open { display:block; }
-  .ms-search { width:100%; font-size:12px; padding:6px 8px; border-radius:6px; border:1px solid var(--border); background:#0A0E17; color:var(--text); margin-bottom:8px; box-sizing:border-box; }
-  .ms-actions { display:flex; justify-content:space-between; font-size:11px; color:var(--cyan); margin-bottom:6px; }
+  .ms-search { width:100%; font-size:13.2px; padding:7px 9px; border-radius:7px; border:1px solid var(--border); background:#0A0E17; color:var(--text); margin-bottom:9px; box-sizing:border-box; }
+  .ms-actions { display:flex; justify-content:space-between; font-size:12.1px; color:var(--cyan); margin-bottom:7px; }
   .ms-actions span { cursor:pointer; }
   .ms-list { display:flex; flex-direction:column; gap:4px; }
-  .ms-item { display:flex; align-items:center; gap:7px; font-size:12px; padding:4px 6px; border-radius:6px; cursor:pointer; }
+  .ms-item { display:flex; align-items:center; gap:8px; font-size:13.2px; padding:5px 7px; border-radius:7px; cursor:pointer; }
+  .ms-item input { width:14.5px; height:14.5px; }
   .ms-item:hover { background:rgba(255,255,255,0.05); }
 
   @media (max-width: 680px) {
@@ -131,9 +149,9 @@
     <div id="filterBar">
       <div class="filter-label">FILTROS</div>
       <div class="date-group">
-        <input type="date" id="dateFrom">
+        <span class="dp-wrap"><input type="text" id="dateFrom" class="dp-input" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" autocomplete="off"></span>
         <span class="date-sep">até</span>
-        <input type="date" id="dateTo">
+        <span class="dp-wrap"><input type="text" id="dateTo" class="dp-input" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" autocomplete="off"></span>
       </div>
       <div id="ms-sprint" class="ms-filter"></div>
       <div id="ms-area" class="ms-filter"></div>
@@ -353,6 +371,101 @@
     else reader.readAsArrayBuffer(file);
   });
 
+  // ---------- Calendário dos filtros de data (digitável em dd/mm/aaaa) ----------
+  const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const pad2 = n => String(n).padStart(2, '0');
+  const isoDe = (y, m, d) => `${y}-${pad2(m + 1)}-${pad2(d)}`;
+  const brDeIso = iso => { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; };
+  function isoDeBr(txt){
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(txt);
+    if (!m) return null;
+    const d = +m[1], mo = +m[2] - 1, y = +m[3];
+    const dt = new Date(y, mo, d);
+    return dt.getFullYear() === y && dt.getMonth() === mo && dt.getDate() === d ? isoDe(y, mo, d) : null;
+  }
+  function mascaraData(txt){
+    const dig = txt.replace(/\D/g, '').slice(0, 8);
+    return [dig.slice(0, 2), dig.slice(2, 4), dig.slice(4)].filter(Boolean).join('/');
+  }
+
+  function createDatePicker(input, onChange){
+    let iso = '', anos = [], viewY = new Date().getFullYear(), viewM = new Date().getMonth();
+    const pop = document.createElement('div');
+    pop.className = 'dp-pop';
+    input.parentNode.appendChild(pop);
+
+    function render(){
+      const hoje = new Date();
+      const isoHoje = isoDe(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+      const opcoesAno = Array.from(new Set([...anos, viewY])).sort((a, b) => a - b);
+      let html = `<div class="dp-head">
+        <button type="button" class="dp-nav" data-nav="-1" aria-label="Mês anterior">‹</button>
+        <select class="dp-mes" aria-label="Mês">${MESES.map((n, i) => `<option value="${i}" ${i === viewM ? 'selected' : ''}>${n}</option>`).join('')}</select>
+        <select class="dp-ano" aria-label="Ano">${opcoesAno.map(a => `<option value="${a}" ${a === viewY ? 'selected' : ''}>${a}</option>`).join('')}</select>
+        <button type="button" class="dp-nav" data-nav="1" aria-label="Próximo mês">›</button>
+      </div><div class="dp-grid">`;
+      ['D','S','T','Q','Q','S','S'].forEach(d => html += `<div class="dp-dow">${d}</div>`);
+      const inicio = new Date(viewY, viewM, 1 - new Date(viewY, viewM, 1).getDay());
+      for (let i = 0; i < 42; i++) {
+        const dt = new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + i);
+        const di = isoDe(dt.getFullYear(), dt.getMonth(), dt.getDate());
+        const cls = ['dp-day', dt.getMonth() !== viewM ? 'out' : '', di === iso ? 'sel' : '', di === isoHoje ? 'today' : ''].join(' ');
+        html += `<button type="button" class="${cls}" data-iso="${di}">${dt.getDate()}</button>`;
+      }
+      pop.innerHTML = html + '</div>';
+    }
+    function verMesDe(isoAlvo){ const [y, m] = isoAlvo.split('-').map(Number); viewY = y; viewM = m - 1; }
+    function abrir(){
+      document.querySelectorAll('.dp-pop.open, .ms-panel.open').forEach(p => { if (p !== pop) p.classList.remove('open'); });
+      if (iso) verMesDe(iso);
+      render();
+      pop.classList.add('open');
+    }
+    function fechar(){ pop.classList.remove('open'); }
+    function definir(novo){ iso = novo; input.value = iso ? brDeIso(iso) : ''; }
+
+    input.addEventListener('focus', abrir);
+    input.addEventListener('click', () => { if (!pop.classList.contains('open')) abrir(); });
+    input.addEventListener('input', () => {
+      input.value = mascaraData(input.value);
+      const novo = isoDeBr(input.value);
+      if (novo) { iso = novo; verMesDe(novo); render(); onChange(); }
+    });
+    input.addEventListener('keydown', e => { if (e.key === 'Escape' || e.key === 'Enter') { fechar(); input.blur(); } });
+    input.addEventListener('blur', () => { input.value = iso ? brDeIso(iso) : ''; });
+
+    // Mantém o foco no campo ao clicar nos dias/setas, para poder continuar digitando
+    pop.addEventListener('mousedown', e => { if (e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION') e.preventDefault(); });
+    pop.addEventListener('click', e => {
+      e.stopPropagation(); // o render troca os botões; sem isso o clique "de fora" fecharia o calendário
+      const nav = e.target.closest('[data-nav]');
+      if (nav) {
+        viewM += Number(nav.dataset.nav);
+        if (viewM < 0) { viewM = 11; viewY--; }
+        if (viewM > 11) { viewM = 0; viewY++; }
+        render();
+        return;
+      }
+      const dia = e.target.closest('[data-iso]');
+      if (dia) { definir(dia.dataset.iso); fechar(); input.blur(); onChange(); }
+    });
+    pop.addEventListener('change', e => {
+      if (e.target.classList.contains('dp-mes')) viewM = Number(e.target.value);
+      if (e.target.classList.contains('dp-ano')) viewY = Number(e.target.value);
+      render();
+    });
+    document.addEventListener('click', e => { if (!input.parentNode.contains(e.target)) fechar(); });
+
+    return {
+      get: () => iso,
+      set: definir,
+      setAnos: (de, ate) => { anos = []; for (let a = de; a <= ate; a++) anos.push(a); }
+    };
+  }
+
+  const dpFrom = createDatePicker(document.getElementById('dateFrom'), () => recompute());
+  const dpTo = createDatePicker(document.getElementById('dateTo'), () => recompute());
+
   document.getElementById('btnRefresh').addEventListener('click', () => {
     document.getElementById('loadPanel').style.display = 'block';
     document.getElementById('btnManualLoad').style.display = 'none';
@@ -467,14 +580,12 @@
     const minDate = dates.length ? new Date(Math.min(...dates)) : new Date();
     const maxDate = dates.length ? new Date(Math.max(...dates)) : new Date();
     const fmt = d => d.toISOString().slice(0,10);
-    const dFrom = document.getElementById('dateFrom'), dTo = document.getElementById('dateTo');
-    dFrom.min = fmt(minDate); dFrom.max = fmt(maxDate); dFrom.value = fmt(minDate);
-    dTo.min = fmt(minDate); dTo.max = fmt(maxDate); dTo.value = fmt(maxDate);
-    dFrom.addEventListener('change', recompute);
-    dTo.addEventListener('change', recompute);
+    [dpFrom, dpTo].forEach(dp => dp.setAnos(minDate.getFullYear() - 1, maxDate.getFullYear() + 1));
+    dpFrom.set(fmt(minDate));
+    dpTo.set(fmt(maxDate));
 
     document.getElementById('btnReset').addEventListener('click', () => {
-      dFrom.value = fmt(minDate); dTo.value = fmt(maxDate);
+      dpFrom.set(fmt(minDate)); dpTo.set(fmt(maxDate));
       msSprint.reset(); msArea.reset(); msDev.reset();
       recompute();
     });
@@ -538,8 +649,8 @@
   function recompute(){
     if (!demandas.length) return;
     if (!window.Chart) { setTimeout(recompute, 100); return; }
-    const from = parseLocalDate(document.getElementById('dateFrom').value, false);
-    const to = parseLocalDate(document.getElementById('dateTo').value, true);
+    const from = parseLocalDate(dpFrom.get(), false);
+    const to = parseLocalDate(dpTo.get(), true);
     const selSprints = msSprint.getSelected();
     const selAreas = msArea.getSelected();
     const selDevs = msDev.getSelected();
