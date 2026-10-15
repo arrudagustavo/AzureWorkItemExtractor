@@ -52,7 +52,7 @@
   #btnReset { flex:0 0 auto; margin-left:auto; font-size:11px; padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; white-space:nowrap; }
   #btnReset:hover { border-color: rgba(244,63,94,0.5); color:#fff; }
 
-  #kpiRow { display:grid; grid-template-columns:repeat(5,1fr); gap:9px; margin-bottom:12px; }
+  #kpiRow { display:grid; grid-template-columns:repeat(6,1fr); gap:9px; margin-bottom:12px; }
   .kpi-card { background:var(--surface); backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:12px; padding:11px 13px; position:relative; overflow:hidden; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; min-width:0; }
   .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: var(--accent); }
   .kpi-card:hover, .panel:hover { transform: translateY(-2px); border-color: rgba(34,211,238,0.4); box-shadow: 0 10px 30px rgba(34,211,238,0.08); }
@@ -110,7 +110,7 @@
     <div id="statusPill" class="status-pill" style="display:none;">
       <span id="statusDot" class="status-dot"></span>
       <span id="statusText">—</span>
-      <button id="btnRefresh" title="Recarregar database.xlsx">⟳</button>
+      <button id="btnRefresh" title="Recarregar dados">⟳</button>
     </div>
   </div>
 
@@ -121,7 +121,7 @@
 
   <div id="loadPanel">
     <h3 id="loadTitle">Carregando base…</h3>
-    <p id="loadText">Buscando <code>database.xlsx</code> neste mesmo local.</p>
+    <p id="loadText">Buscando <code>database.json</code> neste mesmo local.</p>
     <button class="file-btn" id="btnManualLoad" style="display:none;" onclick="document.getElementById('fileInput').click()">📂 Carregar arquivo manualmente</button>
     <input type="file" id="fileInput" accept=".xlsx,application/json">
     <div id="fileMeta"></div>
@@ -148,9 +148,9 @@
         <div class="kpi-sub" id="kpiTotalSub">—</div>
       </div>
       <div class="kpi-card" style="--accent:linear-gradient(90deg,var(--red),var(--amber));">
-        <div class="kpi-label">% BUGS</div>
-        <div class="kpi-value"><span class="count" id="kpiBugs">0</span>%</div>
-        <div class="kpi-sub" id="kpiBugsSub">—</div>
+        <div class="kpi-label">% PROBLEMAS</div>
+        <div class="kpi-value"><span class="count" id="kpiProblemas">0</span>%</div>
+        <div class="kpi-sub" id="kpiProblemasSub">—</div>
       </div>
       <div class="kpi-card" style="--accent:linear-gradient(90deg,var(--amber),var(--purple));">
         <div class="kpi-label">CICLO MÉDIO</div>
@@ -167,6 +167,11 @@
         <div class="kpi-value"><span class="count" id="kpiAvgSprint">0</span></div>
         <div class="kpi-sub">demandas concluídas</div>
       </div>
+      <div class="kpi-card" style="--accent:linear-gradient(90deg,var(--cyan),var(--green));">
+        <div class="kpi-label">TASKS E BUGS</div>
+        <div class="kpi-value"><span class="count" id="kpiFilhos">0</span></div>
+        <div class="kpi-sub" id="kpiFilhosSub">—</div>
+      </div>
     </div>
 
     <div class="row-full">
@@ -178,7 +183,7 @@
 
     <div class="row-full">
       <div class="panel">
-        <div class="panel-title"><span style="color:var(--cyan);">◆</span> Bugs × User Stories por Sprint</div>
+        <div class="panel-title"><span style="color:var(--cyan);">◆</span> Demandas por Sprint</div>
         <div class="chart-wrap" style="height:210px;"><canvas id="sprintChart"></canvas></div>
       </div>
     </div>
@@ -235,6 +240,7 @@
   const STATUS_COLORS = {
     'Closed': '#22C55E',            // verde
     'Active': '#3B82F6',            // azul
+    'Code Review': '#7DD3FC',       // azul claro
     'Aguardando Deploy': '#8B96A8', // cinza
     'Homologação': '#FBBF24',       // amarelo
     'Bloqueado': '#F43F5E',         // vermelho
@@ -257,21 +263,37 @@
   let msSprint, msArea, msDev;
   let datalabelsReady = false;
 
-  // ---------- Carregamento automático de database.xlsx (com fallback manual) ----------
-  const DATA_FILE = 'database.xlsx';
+  // ---------- Carregamento automático: database.json, com database.xlsx de reserva ----------
+  // ?arquivo=database-teste.json permite conferir outro arquivo do mesmo site
+  const arquivoParam = new URLSearchParams(location.search).get('arquivo');
+  const FONTES = arquivoParam && /^[\w.-]+\.(json|xlsx)$/i.test(arquivoParam)
+    ? [arquivoParam]
+    : ['database.json', 'database.xlsx'];
+
+  function lerJson(obj){
+    return Array.isArray(obj)
+      ? { itens: obj, geradoEm: null }
+      : { itens: obj.itens || [], geradoEm: obj.geradoEm || null };
+  }
 
   async function autoLoad(){
-    setLoadState('loading', `Buscando ${DATA_FILE} neste mesmo local...`);
-    try {
-      const res = await fetch(DATA_FILE, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const buf = await res.arrayBuffer();
-      const rows = parseXlsx(buf);
-      loadRows(rows, `${DATA_FILE} (${rows.length} linhas)`);
-    } catch (err) {
-      setLoadState('error', `Não encontrei ${DATA_FILE} aqui (${err.message}). Se você estiver testando localmente (abrindo o arquivo direto, sem servidor), isso é esperado — use o carregamento manual abaixo. No GitHub Pages isso deve carregar sozinho.`);
-      document.getElementById('btnManualLoad').style.display = 'inline-flex';
+    setLoadState('loading', `Buscando ${FONTES.join(' ou ')} neste mesmo local...`);
+    const erros = [];
+    for (const nome of FONTES) {
+      try {
+        const res = await fetch(nome, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const dados = nome.toLowerCase().endsWith('.json')
+          ? lerJson(await res.json())
+          : { itens: parseXlsx(await res.arrayBuffer()), geradoEm: null };
+        loadRows(dados.itens, nome, dados.geradoEm);
+        return;
+      } catch (err) {
+        erros.push(`${nome}: ${err.message}`);
+      }
     }
+    setLoadState('error', `Não encontrei a base aqui (${erros.join('; ')}). Se você estiver testando localmente (abrindo o arquivo direto, sem servidor), isso é esperado — use o carregamento manual abaixo. No GitHub Pages isso deve carregar sozinho.`);
+    document.getElementById('btnManualLoad').style.display = 'inline-flex';
   }
 
   function parseXlsx(arrayBuffer){
@@ -297,14 +319,17 @@
     document.getElementById('loadText').innerHTML = text;
   }
 
-  function loadRows(raw, sourceLabel){
+  function loadRows(raw, sourceLabel, geradoEm){
     demandas = buildDemandas(raw);
     document.getElementById('loadPanel').style.display = 'none';
     document.getElementById('fileMeta').textContent = '';
     const pill = document.getElementById('statusPill');
     pill.style.display = 'flex';
     document.getElementById('statusDot').className = 'status-dot';
-    document.getElementById('statusText').textContent = `${sourceLabel} — ${demandas.length} demandas — atualizado ${new Date().toLocaleTimeString('pt-BR')}`;
+    const quando = geradoEm
+      ? 'dados de ' + new Date(geradoEm).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })
+      : 'carregado às ' + new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    document.getElementById('statusText').textContent = `${sourceLabel} — ${demandas.length} demandas — ${quando}`;
     setupFilters();
     document.getElementById('dashContent').classList.add('ready');
     recompute();
@@ -316,13 +341,10 @@
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
-        let raw;
-        if (file.name.toLowerCase().endsWith('.json')) {
-          raw = JSON.parse(ev.target.result);
-        } else {
-          raw = parseXlsx(ev.target.result);
-        }
-        loadRows(raw, file.name);
+        const dados = file.name.toLowerCase().endsWith('.json')
+          ? lerJson(JSON.parse(ev.target.result))
+          : { itens: parseXlsx(ev.target.result), geradoEm: null };
+        loadRows(dados.itens, file.name, dados.geradoEm);
       } catch (err) {
         document.getElementById('fileMeta').textContent = 'Erro ao ler o arquivo: ' + err.message;
       }
@@ -338,43 +360,36 @@
     autoLoad();
   });
 
-  // Reconhece "Task" e variantes (ex: "Task Design") como mesclável — nunca vira demanda própria
-  function isTaskLike(tipo){ return /^Task\b/.test(tipo || ''); }
+  // Pais (sempre em nome do PO) são as demandas; filhos (Task, Task Design, Bug...) medem o trabalho de cada dev
+  const TIPOS_PAI = new Set(['User Story', 'User Story Design', 'Problema']);
+  const SEM_DEV = 'Sem dev';
 
   function buildDemandas(raw) {
-    const tasksByParent = new Map();
+    const pais = raw.filter(it => TIPOS_PAI.has(it.Tipo));
+    const idsPais = new Set(pais.map(p => String(p.ID)));
+    const filhosPorPai = new Map();
     raw.forEach(it => {
-      if (isTaskLike(it.Tipo)) {
-        const pid = it.ID_Pai;
-        if (!tasksByParent.has(pid)) tasksByParent.set(pid, []);
-        tasksByParent.get(pid).push(it);
-      }
+      if (TIPOS_PAI.has(it.Tipo)) return;
+      const pid = String(it.ID_Pai);
+      if (!idsPais.has(pid)) return; // sem pai em nome do PO: fica de fora
+      if (!filhosPorPai.has(pid)) filhosPorPai.set(pid, []);
+      filhosPorPai.get(pid).push({ tipo: it.Tipo, dev: it.Responsavel || 'Não atribuído' });
     });
-    const out = [];
-    raw.forEach(it => {
-      if (isTaskLike(it.Tipo)) return; // Task e variantes nunca viram demanda própria
-      let devs;
-      if (it.Tipo === 'Bug') {
-        devs = [ it.Responsavel || 'Não atribuído' ];
-      } else {
-        const children = tasksByParent.get(it.ID) || [];
-        devs = children.length
-          ? Array.from(new Set(children.map(t => t.Responsavel || 'Não atribuído')))
-          : [ it.Responsavel || 'Não atribuído' ];
-      }
-      out.push({
+    return pais.map(it => {
+      const filhos = filhosPorPai.get(String(it.ID)) || [];
+      return {
         id: it.ID,
         tipo: it.Tipo,
         titulo: it.Titulo,
         status: it.Status,
         sprint: it.Sprint || '(sem sprint)',
         area: it.Tags || '(sem tag)',
-        devs,
+        filhos,
+        devs: filhos.length ? Array.from(new Set(filhos.map(f => f.dev))) : [SEM_DEV],
         created: it.Data_Criacao ? new Date(it.Data_Criacao) : null,
         cycle: it.Status === 'Closed' ? (it.Dias_Ciclo ?? null) : null
-      });
+      };
     });
-    return out;
   }
 
   function naturalSortSprints(list) {
@@ -542,7 +557,10 @@
     const states = Array.from(new Set(demandas.map(d => d.status))).sort();
 
     const total = filtered.length;
-    const bugs = filtered.filter(d => d.tipo === 'Bug').length;
+    const problemas = filtered.filter(d => d.tipo === 'Problema').length;
+    const filhos = filtered.flatMap(d => d.filhos).filter(f => selDevs.has(f.dev));
+    const filhosPorTipo = {};
+    filhos.forEach(f => { filhosPorTipo[f.tipo] = (filhosPorTipo[f.tipo] || 0) + 1; });
     const done = filtered.filter(d => d.status === 'Closed');
     const cycleVals = done.map(d => d.cycle).filter(v => v != null);
     const avgCycle = cycleVals.length ? cycleVals.reduce((a,b)=>a+b,0)/cycleVals.length : 0;
@@ -550,8 +568,8 @@
     const sprintsPresent = new Set(filtered.map(d => d.sprint));
     const avgPerSprint = sprintsPresent.size ? done.length / sprintsPresent.size : 0;
 
-    const perSprintBug = sprints.map(s => filtered.filter(d => d.sprint===s && d.tipo==='Bug').length);
-    const perSprintUS = sprints.map(s => filtered.filter(d => d.sprint===s && d.tipo==='User Story').length);
+    const perSprintByTipo = {};
+    tipos.forEach(t => { perSprintByTipo[t] = sprints.map(s => filtered.filter(d => d.sprint===s && d.tipo===t).length); });
     const perState = states.map(s => filtered.filter(d => d.status===s).length);
     const perTipo = tipos.map(t => filtered.filter(d => d.tipo===t).length);
     const perAreaByTipo = {};
@@ -563,14 +581,19 @@
 
     animateValue(document.getElementById('kpiTotal'), total, 0);
     document.getElementById('kpiTotalSub').textContent = `${sprintsPresent.size} sprint(s) no filtro`;
-    animateValue(document.getElementById('kpiBugs'), total ? Math.round(bugs/total*100) : 0, 0);
-    document.getElementById('kpiBugsSub').textContent = `${bugs} de ${total} demandas`;
+    animateValue(document.getElementById('kpiProblemas'), total ? Math.round(problemas/total*100) : 0, 0);
+    document.getElementById('kpiProblemasSub').textContent = `${problemas} de ${total} demandas`;
+    animateValue(document.getElementById('kpiFilhos'), filhos.length, 0);
+    const filhosSub = document.getElementById('kpiFilhosSub');
+    filhosSub.textContent = Object.entries(filhosPorTipo)
+      .sort((a, b) => b[1] - a[1]).map(([t, n]) => `${n} ${t}`).join(' · ') || '—';
+    filhosSub.title = filhosSub.textContent;
     animateValue(document.getElementById('kpiCycle'), avgCycle, 1);
     animateValue(document.getElementById('kpiDone'), done.length, 0);
     document.getElementById('kpiDoneSub').textContent = `${total ? Math.round(done.length/total*100) : 0}%`;
     animateValue(document.getElementById('kpiAvgSprint'), avgPerSprint, 1);
 
-    renderCharts({ sprints, areas, tipos, states, perSprintBug, perSprintUS, perState, perTipo, perAreaByTipo, perAreaByState, perSprintByState });
+    renderCharts({ sprints, areas, tipos, states, perSprintByTipo, perState, perTipo, perAreaByTipo, perAreaByState, perSprintByState });
   }
 
   function renderCharts(d){
@@ -587,10 +610,7 @@
 
     charts.sprint = new Chart(document.getElementById('sprintChart'), {
       type:'bar',
-      data: { labels: d.sprints, datasets: [
-        { label:'Bug', data: d.perSprintBug, backgroundColor: tipoColor('Bug'), borderRadius:6 },
-        { label:'User Story', data: d.perSprintUS, backgroundColor: tipoColor('User Story'), borderRadius:6 }
-      ]},
+      data: { labels: d.sprints, datasets: d.tipos.map(t => ({ label:t, data: d.perSprintByTipo[t], backgroundColor: tipoColor(t), borderRadius:6 })) },
       options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:10}}, datalabels:{color: (ctx)=>contrastText(ctx.dataset.backgroundColor), font:{weight:'700',size:10}, formatter:v=>v>0?v:''}}, scales:{ y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}}, x:{grid:{display:false}} } }
     });
 
