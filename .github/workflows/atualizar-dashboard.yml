@@ -2,7 +2,7 @@ name: Atualizar Dashboard
 
 on:
   schedule:
-    - cron: '0 12,19 * * 1-5'   # seg a sex, 12:00 e 19:00 UTC = 09:00 e 16:00 em Brasília
+    - cron: '17 11,18 * * 1-5'   # seg a sex, 12:00 e 19:00 UTC = 09:00 e 16:00 em Brasília
   workflow_dispatch:
 
 permissions:
