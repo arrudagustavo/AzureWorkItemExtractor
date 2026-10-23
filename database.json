@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-10-22T21:43:35.356Z",
+  "geradoEm": "2026-10-23T15:46:49.928Z",
   "itens": [
     {
       "ID": 9906,
@@ -1647,7 +1647,7 @@
       "ID_Pai": 12648,
       "Story_Points": 8,
       "Data_Criacao": "2026-05-05T12:53:47.11Z",
-      "Ultima_Alteracao": "2026-10-22T20:15:59.55Z",
+      "Ultima_Alteracao": "2026-10-23T13:07:26.123Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/12649"
     },
@@ -1662,7 +1662,7 @@
       "ID_Pai": 12648,
       "Story_Points": 8,
       "Data_Criacao": "2026-05-05T12:53:56.353Z",
-      "Ultima_Alteracao": "2026-10-22T20:16:05.68Z",
+      "Ultima_Alteracao": "2026-10-23T13:07:31.493Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/12650"
     },
@@ -3422,6 +3422,51 @@
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/13771"
     },
     {
+      "ID": 13793,
+      "Tipo": "User Story",
+      "Titulo": "[LP][MY] Controle de Cores via MD",
+      "Status": "Closed",
+      "Sprint": "Digital\\Sprint 47-2026",
+      "Responsavel": "Gustavo De Souza Arruda",
+      "Tags": "ecommerce",
+      "ID_Pai": "Nenhum",
+      "Story_Points": null,
+      "Data_Criacao": "2026-07-23T14:11:44.767Z",
+      "Ultima_Alteracao": "2026-10-23T01:27:21.067Z",
+      "Dias_Ciclo": 0,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/13793"
+    },
+    {
+      "ID": 13794,
+      "Tipo": "Task",
+      "Titulo": "[LP] Controle de Cores via MD",
+      "Status": "Closed",
+      "Sprint": "Digital\\Sprint 47-2026",
+      "Responsavel": "Felipe da Silva",
+      "Tags": "ecommerce",
+      "ID_Pai": 13793,
+      "Story_Points": null,
+      "Data_Criacao": "2026-07-23T14:14:32.593Z",
+      "Ultima_Alteracao": "2026-10-23T01:26:15.133Z",
+      "Dias_Ciclo": 0,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/13794"
+    },
+    {
+      "ID": 13795,
+      "Tipo": "Task",
+      "Titulo": "[MY] Controle de Cores via MD",
+      "Status": "Closed",
+      "Sprint": "Digital\\Sprint 47-2026",
+      "Responsavel": "Felipe da Silva",
+      "Tags": "ecommerce",
+      "ID_Pai": 13793,
+      "Story_Points": null,
+      "Data_Criacao": "2026-07-23T14:14:44.513Z",
+      "Ultima_Alteracao": "2026-10-23T01:26:07.663Z",
+      "Dias_Ciclo": 0,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/13795"
+    },
+    {
       "ID": 13796,
       "Tipo": "User Story",
       "Titulo": "[LP] Adição de novas Cores",
@@ -4805,14 +4850,14 @@
       "ID": 14604,
       "Tipo": "Task",
       "Titulo": "[MY] Correção de meta robots",
-      "Status": "Active",
+      "Status": "Homologação",
       "Sprint": "Digital\\Sprint 47-2026",
       "Responsavel": "Felipe da Silva",
       "Tags": "SEO",
       "ID_Pai": 14480,
       "Story_Points": null,
       "Data_Criacao": "2026-09-11T17:25:35.503Z",
-      "Ultima_Alteracao": "2026-10-22T20:27:16.84Z",
+      "Ultima_Alteracao": "2026-10-23T13:49:09.317Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/14604"
     },
@@ -6810,6 +6855,36 @@
       "Ultima_Alteracao": "2026-10-22T21:13:09.643Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15414"
+    },
+    {
+      "ID": 15416,
+      "Tipo": "Problema",
+      "Titulo": "[MY] Carrinho - cupom GUSTAVO20 aparece como inválido",
+      "Status": "New",
+      "Sprint": "Digital\\Agent Bug - PD",
+      "Responsavel": "Gustavo De Souza Arruda",
+      "Tags": "ecommerce",
+      "ID_Pai": "Nenhum",
+      "Story_Points": null,
+      "Data_Criacao": "2026-10-23T00:11:51.25Z",
+      "Ultima_Alteracao": "2026-10-23T13:25:12.1Z",
+      "Dias_Ciclo": null,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15416"
+    },
+    {
+      "ID": 15420,
+      "Tipo": "User Story",
+      "Titulo": "[LP][MY] Tratativa CPF Duplicado",
+      "Status": "New",
+      "Sprint": "Digital\\Sprint 47-2026",
+      "Responsavel": "Gustavo De Souza Arruda",
+      "Tags": "PD",
+      "ID_Pai": "Nenhum",
+      "Story_Points": null,
+      "Data_Criacao": "2026-10-23T13:51:10.33Z",
+      "Ultima_Alteracao": "2026-10-23T14:05:06.533Z",
+      "Dias_Ciclo": null,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15420"
     }
   ]
 }
