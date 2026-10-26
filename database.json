@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-10-26T16:11:32.713Z",
+  "geradoEm": "2026-10-26T17:26:04.544Z",
   "itens": [
     {
       "ID": 9906,
@@ -4857,7 +4857,7 @@
       "ID_Pai": 14480,
       "Story_Points": null,
       "Data_Criacao": "2026-09-11T17:25:35.503Z",
-      "Ultima_Alteracao": "2026-10-23T13:49:09.317Z",
+      "Ultima_Alteracao": "2026-10-26T16:50:42.753Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/14604"
     },
@@ -5067,7 +5067,7 @@
       "ID_Pai": "Nenhum",
       "Story_Points": null,
       "Data_Criacao": "2026-09-17T19:59:24.41Z",
-      "Ultima_Alteracao": "2026-10-26T13:58:45.83Z",
+      "Ultima_Alteracao": "2026-10-26T17:14:08.01Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/14759"
     },
@@ -6815,14 +6815,14 @@
       "ID": 15412,
       "Tipo": "User Story",
       "Titulo": "[LP][MY] Vulnerabilidades PHP e NODE.js",
-      "Status": "New",
+      "Status": "Active",
       "Sprint": "Digital\\Sprint 47-2026",
       "Responsavel": "Gustavo De Souza Arruda",
       "Tags": "SI",
       "ID_Pai": "Nenhum",
       "Story_Points": null,
       "Data_Criacao": "2026-10-22T21:10:51.68Z",
-      "Ultima_Alteracao": "2026-10-22T21:25:28.987Z",
+      "Ultima_Alteracao": "2026-10-26T17:13:52.783Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15412"
     },
@@ -6875,14 +6875,14 @@
       "ID": 15420,
       "Tipo": "User Story",
       "Titulo": "[LP][MY] Tratativa CPF Duplicado (Fraude)",
-      "Status": "New",
+      "Status": "Active",
       "Sprint": "Digital\\Sprint 47-2026",
       "Responsavel": "Gustavo De Souza Arruda",
       "Tags": "PD",
       "ID_Pai": "Nenhum",
       "Story_Points": null,
       "Data_Criacao": "2026-10-23T13:51:10.33Z",
-      "Ultima_Alteracao": "2026-10-23T17:40:51.303Z",
+      "Ultima_Alteracao": "2026-10-26T17:13:35.853Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15420"
     },
@@ -6935,14 +6935,14 @@
       "ID": 15435,
       "Tipo": "Task",
       "Titulo": "[MY] Tratativa CPF Duplicado (Fraude)",
-      "Status": "New",
+      "Status": "Active",
       "Sprint": "Digital\\Sprint 47-2026",
       "Responsavel": "Felipe da Silva",
       "Tags": "PD",
       "ID_Pai": 15420,
       "Story_Points": null,
       "Data_Criacao": "2026-10-26T12:49:01.75Z",
-      "Ultima_Alteracao": "2026-10-26T12:49:01.75Z",
+      "Ultima_Alteracao": "2026-10-26T16:53:18.887Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15435"
     }
