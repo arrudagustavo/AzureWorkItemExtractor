@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-10-26T17:26:04.544Z",
+  "geradoEm": "2026-10-26T22:45:20.472Z",
   "itens": [
     {
       "ID": 9906,
@@ -4512,7 +4512,7 @@
       "ID_Pai": "Nenhum",
       "Story_Points": null,
       "Data_Criacao": "2026-09-02T15:10:39.897Z",
-      "Ultima_Alteracao": "2026-10-22T13:44:40.427Z",
+      "Ultima_Alteracao": "2026-10-26T20:35:08.663Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/14470"
     },
@@ -4857,7 +4857,7 @@
       "ID_Pai": 14480,
       "Story_Points": null,
       "Data_Criacao": "2026-09-11T17:25:35.503Z",
-      "Ultima_Alteracao": "2026-10-26T16:50:42.753Z",
+      "Ultima_Alteracao": "2026-10-26T20:04:29.33Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/14604"
     },
@@ -4970,15 +4970,15 @@
       "ID": 14718,
       "Tipo": "Task",
       "Titulo": "[LP] Melhoria template BlackFriday",
-      "Status": "Closed",
-      "Sprint": "Digital\\Sprint 46-2026",
+      "Status": "Active",
+      "Sprint": "Digital\\Sprint 47-2026",
       "Responsavel": "Daniel Fedatto",
       "Tags": "UX",
       "ID_Pai": 14470,
       "Story_Points": 3,
       "Data_Criacao": "2026-09-16T13:58:14.853Z",
-      "Ultima_Alteracao": "2026-10-22T13:34:54.56Z",
-      "Dias_Ciclo": 34,
+      "Ultima_Alteracao": "2026-10-26T20:34:38.45Z",
+      "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/14718"
     },
     {
@@ -4986,13 +4986,13 @@
       "Tipo": "Task",
       "Titulo": "[MY] Melhoria template BlackFriday",
       "Status": "Aguardando Deploy",
-      "Sprint": "Digital\\Sprint 46-2026",
+      "Sprint": "Digital\\Sprint 47-2026",
       "Responsavel": "Daniel Fedatto",
       "Tags": "UX",
       "ID_Pai": 14470,
       "Story_Points": 3,
       "Data_Criacao": "2026-09-16T13:58:32.667Z",
-      "Ultima_Alteracao": "2026-10-22T13:44:34.643Z",
+      "Ultima_Alteracao": "2026-10-26T20:34:44.65Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/14719"
     },
@@ -6945,6 +6945,36 @@
       "Ultima_Alteracao": "2026-10-26T16:53:18.887Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15435"
+    },
+    {
+      "ID": 15444,
+      "Tipo": "Problema",
+      "Titulo": "[LP] Compre o look não respeitando produto aberto na PDP",
+      "Status": "New",
+      "Sprint": "Digital\\Sprint 47-2026",
+      "Responsavel": "Gustavo De Souza Arruda",
+      "Tags": "ecommerce",
+      "ID_Pai": "Nenhum",
+      "Story_Points": null,
+      "Data_Criacao": "2026-10-26T20:54:34.057Z",
+      "Ultima_Alteracao": "2026-10-26T20:57:01.87Z",
+      "Dias_Ciclo": null,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15444"
+    },
+    {
+      "ID": 15445,
+      "Tipo": "Bug",
+      "Titulo": "[LP] Compre o look não respeitando produto aberto na PDP",
+      "Status": "New",
+      "Sprint": "Digital\\Sprint 47-2026",
+      "Responsavel": "Felipe da Silva",
+      "Tags": "ecommerce",
+      "ID_Pai": 15444,
+      "Story_Points": null,
+      "Data_Criacao": "2026-10-26T20:57:11.74Z",
+      "Ultima_Alteracao": "2026-10-26T20:57:11.74Z",
+      "Dias_Ciclo": null,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15445"
     }
   ]
 }
