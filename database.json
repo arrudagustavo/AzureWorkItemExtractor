@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-10-29T22:50:58.083Z",
+  "geradoEm": "2026-10-30T17:03:20.581Z",
   "itens": [
     {
       "ID": 9906,
@@ -6890,14 +6890,14 @@
       "ID": 15414,
       "Tipo": "Task",
       "Titulo": "[MY] Vulnerabilidades PHP e NODE.js",
-      "Status": "New",
+      "Status": "Active",
       "Sprint": "Digital\\Sprint 47-2026",
       "Responsavel": "Felipe da Silva",
       "Tags": "SI",
       "ID_Pai": 15412,
       "Story_Points": null,
       "Data_Criacao": "2026-10-22T21:12:50.31Z",
-      "Ultima_Alteracao": "2026-10-27T12:40:49.867Z",
+      "Ultima_Alteracao": "2026-10-30T12:45:37.11Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15414"
     },
