@@ -250,7 +250,7 @@
   // Cores fixas por Tipo / Status (como vier na coluna) — cai no palette cíclico se aparecer um valor novo
   const TIPO_COLORS = {
     'Bug': '#F43F5E',              // vermelho
-    'User Story': '#2DD4BF',       // verde água
+    'User Story': '#3B82F6',       // azul (mesmo do Active)
     'User Story Design': '#22C55E',// verde
     'Task': '#22C55E',             // verde
     'Problema': '#FB923C'          // laranja
@@ -262,10 +262,14 @@
     'Aguardando Deploy': '#8B96A8', // cinza
     'Homologação': '#FBBF24',       // amarelo
     'Bloqueado': '#F43F5E',         // vermelho
+    'Bloqueada': '#F43F5E',         // vermelho (nome usado no board)
     'New': '#F5F5F5',               // branco
     'Release': '#A855F7',           // roxo
     'Removed': '#000000'            // preto
   };
+  // Sprints que não entram no eixo dos gráficos por sprint
+  const SPRINTS_FORA_GRAFICOS = new Set(['Digital\\Agent Bug - PD']);
+
   function tipoColor(key){ return TIPO_COLORS[key] || colorFor(key); }
   function statusColor(key){ return STATUS_COLORS[key] || colorFor(key); }
   function contrastText(hex){
@@ -664,7 +668,7 @@
       d.devs.some(dv => selDevs.has(dv))
     );
 
-    const sprints = naturalSortSprints(Array.from(new Set(demandas.map(d => d.sprint))));
+    const sprints = naturalSortSprints(Array.from(new Set(demandas.map(d => d.sprint)))).filter(s => !SPRINTS_FORA_GRAFICOS.has(s));
     const areas = Array.from(new Set(demandas.map(d => d.area))).sort();
     const tipos = Array.from(new Set(demandas.map(d => d.tipo))).sort();
     const states = Array.from(new Set(demandas.map(d => d.status))).sort();
