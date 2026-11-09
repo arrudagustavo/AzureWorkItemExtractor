@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-11-09T13:53:26.662Z",
+  "geradoEm": "2026-11-09T21:28:36.924Z",
   "itens": [
     {
       "ID": 9906,
@@ -6800,14 +6800,14 @@
       "ID": 15399,
       "Tipo": "Task",
       "Titulo": "[LP] Resumo da compra",
-      "Status": "Active",
+      "Status": "Code Review",
       "Sprint": "Digital\\Sprint 48-2026",
       "Responsavel": "Marlon Cligio Almeida Coutinho",
       "Tags": "UX",
       "ID_Pai": 15397,
       "Story_Points": 2,
       "Data_Criacao": "2026-10-22T14:40:15.747Z",
-      "Ultima_Alteracao": "2026-11-05T18:10:47.377Z",
+      "Ultima_Alteracao": "2026-11-09T19:22:42.203Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15399"
     },
@@ -7160,14 +7160,14 @@
       "ID": 15499,
       "Tipo": "Task",
       "Titulo": "[LP] Cupom e código do vendedor",
-      "Status": "New",
+      "Status": "Active",
       "Sprint": "Digital\\Sprint 48-2026",
       "Responsavel": "Marlon Cligio Almeida Coutinho",
       "Tags": "UX",
       "ID_Pai": 15397,
-      "Story_Points": null,
+      "Story_Points": 3,
       "Data_Criacao": "2026-10-29T18:14:05.017Z",
-      "Ultima_Alteracao": "2026-10-29T20:22:23.72Z",
+      "Ultima_Alteracao": "2026-11-09T19:25:15.287Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15499"
     },
