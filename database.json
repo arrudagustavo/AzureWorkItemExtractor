@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-11-10T18:42:19.661Z",
+  "geradoEm": "2026-11-11T18:44:38.927Z",
   "itens": [
     {
       "ID": 9906,
@@ -5517,7 +5517,7 @@
       "ID_Pai": 14757,
       "Story_Points": null,
       "Data_Criacao": "2026-10-05T13:33:54.03Z",
-      "Ultima_Alteracao": "2026-10-30T20:28:53.293Z",
+      "Ultima_Alteracao": "2026-11-11T18:29:34.11Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15104"
     },
@@ -6792,7 +6792,7 @@
       "ID_Pai": 15397,
       "Story_Points": 2,
       "Data_Criacao": "2026-10-22T14:40:05.133Z",
-      "Ultima_Alteracao": "2026-11-10T16:02:40.707Z",
+      "Ultima_Alteracao": "2026-11-11T16:23:45.237Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15398"
     },
@@ -7320,6 +7320,81 @@
       "Ultima_Alteracao": "2026-11-05T19:38:11.96Z",
       "Dias_Ciclo": 0.1,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15589"
+    },
+    {
+      "ID": 15709,
+      "Tipo": "Problema",
+      "Titulo": "[MY] flag (11.11) nao reflete no desk e mob apenas no app/ apos 2h de ajuste no master data",
+      "Status": "Closed",
+      "Sprint": "Digital\\Sprint 48-2026",
+      "Responsavel": "Gustavo De Souza Arruda",
+      "Tags": "ecommerce",
+      "ID_Pai": "Nenhum",
+      "Story_Points": null,
+      "Data_Criacao": "2026-11-11T17:48:47.623Z",
+      "Ultima_Alteracao": "2026-11-11T17:52:25.433Z",
+      "Dias_Ciclo": 0,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15709"
+    },
+    {
+      "ID": 15710,
+      "Tipo": "Bug",
+      "Titulo": "[MY] flag (11.11) nao reflete no desk e mob apenas no app/ apos 2h de ajuste no master data",
+      "Status": "Closed",
+      "Sprint": "Digital\\Sprint 48-2026",
+      "Responsavel": "Felipe da Silva",
+      "Tags": "ecommerce",
+      "ID_Pai": 15709,
+      "Story_Points": null,
+      "Data_Criacao": "2026-11-11T17:51:12.64Z",
+      "Ultima_Alteracao": "2026-11-11T17:52:21.263Z",
+      "Dias_Ciclo": null,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15710"
+    },
+    {
+      "ID": 15712,
+      "Tipo": "User Story",
+      "Titulo": "[LP][MY] Encerramento Parceria Smarthint",
+      "Status": "New",
+      "Sprint": "Digital\\Sprint 48-2026",
+      "Responsavel": "Gustavo De Souza Arruda",
+      "Tags": "ecommerce",
+      "ID_Pai": "Nenhum",
+      "Story_Points": null,
+      "Data_Criacao": "2026-11-11T18:24:37.077Z",
+      "Ultima_Alteracao": "2026-11-11T18:34:14.87Z",
+      "Dias_Ciclo": null,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15712"
+    },
+    {
+      "ID": 15713,
+      "Tipo": "Task",
+      "Titulo": "[LP] Encerramento Parceria Smarthint",
+      "Status": "New",
+      "Sprint": "Digital\\Sprint 48-2026",
+      "Responsavel": "Felipe da Silva",
+      "Tags": "ecommerce",
+      "ID_Pai": 15712,
+      "Story_Points": null,
+      "Data_Criacao": "2026-11-11T18:34:44.083Z",
+      "Ultima_Alteracao": "2026-11-11T18:34:44.083Z",
+      "Dias_Ciclo": null,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15713"
+    },
+    {
+      "ID": 15714,
+      "Tipo": "Task",
+      "Titulo": "[MY] Encerramento Parceria Smarthint",
+      "Status": "New",
+      "Sprint": "Digital\\Sprint 48-2026",
+      "Responsavel": "Felipe da Silva",
+      "Tags": "ecommerce",
+      "ID_Pai": 15712,
+      "Story_Points": null,
+      "Data_Criacao": "2026-11-11T18:34:55.877Z",
+      "Ultima_Alteracao": "2026-11-11T18:34:55.877Z",
+      "Dias_Ciclo": null,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15714"
     }
   ]
 }
