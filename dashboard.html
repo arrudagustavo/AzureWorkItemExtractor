@@ -194,8 +194,15 @@
 
     <div class="row-full">
       <div class="panel">
-        <div class="panel-title"><span style="color:var(--amber);">◆</span> Sprint x Status (User Story)</div>
+        <div class="panel-title"><span style="color:var(--amber);">◆</span> Sprint x Status (User Story, Problema e US Design)</div>
         <div class="chart-wrap" style="height:220px;"><canvas id="sprintStatusChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="row-full">
+      <div class="panel">
+        <div class="panel-title"><span style="color:var(--green);">◆</span> Sprint x Status (Task, Bug e Task Design)</div>
+        <div class="chart-wrap" style="height:220px;"><canvas id="sprintTaskStatusChart"></canvas></div>
       </div>
     </div>
 
@@ -267,8 +274,8 @@
     'Release': '#A855F7',           // roxo
     'Removed': '#000000'            // preto
   };
-  // Sprints que não entram no eixo dos gráficos por sprint
-  const SPRINTS_FORA_GRAFICOS = new Set(['Digital\\Agent Bug - PD']);
+  // Iterações ignoradas no dash inteiro (a busca do Azure já tira; aqui é a garantia para arquivos antigos)
+  const ITERACOES_FORA = new Set(['Digital\\Backlog - Web', 'Digital\\Agent Bug - PD']);
 
   function tipoColor(key){ return TIPO_COLORS[key] || colorFor(key); }
   function statusColor(key){ return STATUS_COLORS[key] || colorFor(key); }
@@ -483,7 +490,8 @@
   const TIPOS_PAI = new Set(['User Story', 'User Story Design', 'Problema']);
   const SEM_DEV = 'Sem dev';
 
-  function buildDemandas(raw) {
+  function buildDemandas(todos) {
+    const raw = todos.filter(it => !ITERACOES_FORA.has(it.Sprint));
     const pais = raw.filter(it => TIPOS_PAI.has(it.Tipo));
     const idsPais = new Set(pais.map(p => String(p.ID)));
     const filhosPorPai = new Map();
@@ -492,7 +500,7 @@
       const pid = String(it.ID_Pai);
       if (!idsPais.has(pid)) return; // sem pai em nome do PO: fica de fora
       if (!filhosPorPai.has(pid)) filhosPorPai.set(pid, []);
-      filhosPorPai.get(pid).push({ tipo: it.Tipo, dev: it.Responsavel || 'Não atribuído' });
+      filhosPorPai.get(pid).push({ tipo: it.Tipo, dev: it.Responsavel || 'Não atribuído', status: it.Status, sprint: it.Sprint || '(sem sprint)' });
     });
     return pais.map(it => {
       const filhos = filhosPorPai.get(String(it.ID)) || [];
@@ -610,22 +618,28 @@
     requestAnimationFrame(step);
   }
 
-  function renderPivot(areas, states, perAreaByState){
+  // Colunas da tabela Área x Status na ordem do fluxo; status fora da lista vão para o fim
+  const ORDEM_STATUS_TABELA = ['New', 'Active', 'Code Review', 'Bloqueada', 'Bloqueado', 'Homologação', 'Aguardando Deploy', 'Release', 'Closed', 'Removed'];
+
+  function renderPivot(areas, statesOriginais, perAreaByState){
     const wrap = document.getElementById('pivotWrap');
+    const posicao = s => { const i = ORDEM_STATUS_TABELA.indexOf(s); return i === -1 ? ORDEM_STATUS_TABELA.length : i; };
+    const states = [...statesOriginais].sort((a, b) => posicao(a) - posicao(b) || a.localeCompare(b));
     const stateTotals = states.map(s => perAreaByState[s].reduce((a,b)=>a+b,0));
     const grandTotal = stateTotals.reduce((a,b)=>a+b,0);
     let html = '<table><thead><tr><th>Área</th>';
     states.forEach(s => html += `<th>${s}</th>`);
     html += '<th class="total-col">Total</th></tr></thead><tbody>';
-    areas.forEach((area, ai) => {
-      let rowTotal = 0;
-      html += `<tr><td>${area}</td>`;
+    // Maior total primeiro; empate em ordem alfabética
+    const rowTotals = areas.map((_, ai) => states.reduce((soma, s) => soma + perAreaByState[s][ai], 0));
+    const ordem = areas.map((_, ai) => ai).sort((a, b) => rowTotals[b] - rowTotals[a] || areas[a].localeCompare(areas[b]));
+    ordem.forEach(ai => {
+      html += `<tr><td>${areas[ai]}</td>`;
       states.forEach(s => {
         const v = perAreaByState[s][ai];
-        rowTotal += v;
         html += `<td class="${v===0?'zero':''}">${v}</td>`;
       });
-      html += `<td class="total-col">${rowTotal}</td></tr>`;
+      html += `<td class="total-col">${rowTotals[ai]}</td></tr>`;
     });
     html += '<tr class="total-row"><td>Total</td>';
     stateTotals.forEach(v => html += `<td>${v}</td>`);
@@ -668,7 +682,7 @@
       d.devs.some(dv => selDevs.has(dv))
     );
 
-    const sprints = naturalSortSprints(Array.from(new Set(demandas.map(d => d.sprint)))).filter(s => !SPRINTS_FORA_GRAFICOS.has(s));
+    const sprints = naturalSortSprints(Array.from(new Set(demandas.map(d => d.sprint))));
     const areas = Array.from(new Set(demandas.map(d => d.area))).sort();
     const tipos = Array.from(new Set(demandas.map(d => d.tipo))).sort();
     const states = Array.from(new Set(demandas.map(d => d.status))).sort();
@@ -694,7 +708,16 @@
     const perAreaByState = {};
     states.forEach(s => { perAreaByState[s] = areas.map(a => filtered.filter(d => d.area===a && d.status===s).length); });
     const perSprintByState = {};
-    states.forEach(s => { perSprintByState[s] = sprints.map(sp => filtered.filter(d => d.sprint===sp && d.status===s && d.tipo==='User Story').length); });
+    states.forEach(s => { perSprintByState[s] = sprints.map(sp => filtered.filter(d => d.sprint===sp && d.status===s).length); });
+
+    // Filhos (Task, Task Design, Bug) contam na sprint deles (não na do pai, que pode ter sido movida); demais filtros vêm do pai
+    const tasks = demandas
+      .filter(d => (!d.created || (d.created >= from && d.created <= to)) && selAreas.has(d.area))
+      .flatMap(d => d.filhos)
+      .filter(f => selDevs.has(f.dev) && selSprints.has(f.sprint));
+    const taskStates = Array.from(new Set(demandas.flatMap(d => d.filhos).map(f => f.status))).sort();
+    const perSprintByTaskState = {};
+    taskStates.forEach(s => { perSprintByTaskState[s] = sprints.map(sp => tasks.filter(f => f.sprint===sp && f.status===s).length); });
 
     animateValue(document.getElementById('kpiTotal'), total, 0);
     document.getElementById('kpiTotalSub').textContent = `${sprintsPresent.size} sprint(s) no filtro`;
@@ -710,7 +733,7 @@
     document.getElementById('kpiDoneSub').textContent = `${total ? Math.round(done.length/total*100) : 0}%`;
     animateValue(document.getElementById('kpiAvgSprint'), avgPerSprint, 1);
 
-    renderCharts({ sprints, areas, tipos, states, perSprintByTipo, perState, perTipo, perAreaByTipo, perAreaByState, perSprintByState });
+    renderCharts({ sprints, areas, tipos, states, perSprintByTipo, perState, perTipo, perAreaByTipo, perAreaByState, perSprintByState, taskStates, perSprintByTaskState });
   }
 
   function renderCharts(d){
@@ -722,6 +745,12 @@
     charts.sprintStatus = new Chart(document.getElementById('sprintStatusChart'), {
       type:'bar',
       data:{ labels: d.sprints, datasets: d.states.map(s => ({ label:s, data: d.perSprintByState[s], backgroundColor: statusColor(s), borderRadius:4 })) },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:9,font:{size:9}}}, datalabels:{color: (ctx)=>contrastText(ctx.dataset.backgroundColor), font:{weight:'700',size:10}, formatter:v=>v>0?v:''}}, scales:{ y:{stacked:true, beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}}, x:{stacked:true, grid:{display:false}} } }
+    });
+
+    charts.sprintTaskStatus = new Chart(document.getElementById('sprintTaskStatusChart'), {
+      type:'bar',
+      data:{ labels: d.sprints, datasets: d.taskStates.map(s => ({ label:s, data: d.perSprintByTaskState[s], backgroundColor: statusColor(s), borderRadius:4 })) },
       options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:9,font:{size:9}}}, datalabels:{color: (ctx)=>contrastText(ctx.dataset.backgroundColor), font:{weight:'700',size:10}, formatter:v=>v>0?v:''}}, scales:{ y:{stacked:true, beginAtZero:true, grid:{color:'rgba(255,255,255,0.06)'}}, x:{stacked:true, grid:{display:false}} } }
     });
 
