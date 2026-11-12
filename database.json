@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-11-11T18:44:38.927Z",
+  "geradoEm": "2026-11-12T15:57:43.928Z",
   "itens": [
     {
       "ID": 9906,
@@ -5255,15 +5255,15 @@
       "ID": 14940,
       "Tipo": "Task",
       "Titulo": "[MY] Correção de dados estruturados de Product em PDPs.loop",
-      "Status": "Release",
+      "Status": "Closed",
       "Sprint": "Digital\\Sprint 47-2026",
       "Responsavel": "Felipe da Silva",
       "Tags": "SEO",
       "ID_Pai": 14760,
       "Story_Points": null,
       "Data_Criacao": "2026-09-28T15:20:02.123Z",
-      "Ultima_Alteracao": "2026-11-03T19:42:19.633Z",
-      "Dias_Ciclo": null,
+      "Ultima_Alteracao": "2026-11-12T15:33:54.06Z",
+      "Dias_Ciclo": 44.5,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/14940"
     },
     {
@@ -6902,21 +6902,6 @@
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15414"
     },
     {
-      "ID": 15416,
-      "Tipo": "Problema",
-      "Titulo": "[MY] Carrinho - cupom GUSTAVO20 aparece como inválido",
-      "Status": "New",
-      "Sprint": "Digital\\Agent Bug - PD",
-      "Responsavel": "Gustavo De Souza Arruda",
-      "Tags": "ecommerce",
-      "ID_Pai": "Nenhum",
-      "Story_Points": null,
-      "Data_Criacao": "2026-10-23T00:11:51.25Z",
-      "Ultima_Alteracao": "2026-10-23T13:25:12.1Z",
-      "Dias_Ciclo": null,
-      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15416"
-    },
-    {
       "ID": 15420,
       "Tipo": "User Story",
       "Titulo": "[LP][MY] Tratativa CPF Duplicado (Fraude)",
@@ -7287,7 +7272,7 @@
       "ID_Pai": 12648,
       "Story_Points": null,
       "Data_Criacao": "2026-11-04T19:07:49.6Z",
-      "Ultima_Alteracao": "2026-11-06T13:23:50.54Z",
+      "Ultima_Alteracao": "2026-11-12T15:57:13.873Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15581"
     },
@@ -7395,6 +7380,66 @@
       "Ultima_Alteracao": "2026-11-11T18:34:55.877Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15714"
+    },
+    {
+      "ID": 15736,
+      "Tipo": "Problema",
+      "Titulo": "[MY] Vitrine PDP não muda os produtos ao passar ID coleção",
+      "Status": "New",
+      "Sprint": "Digital\\Sprint 48-2026",
+      "Responsavel": "Gustavo De Souza Arruda",
+      "Tags": "ecommerce",
+      "ID_Pai": "Nenhum",
+      "Story_Points": null,
+      "Data_Criacao": "2026-11-12T13:42:11.737Z",
+      "Ultima_Alteracao": "2026-11-12T13:53:16.7Z",
+      "Dias_Ciclo": null,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15736"
+    },
+    {
+      "ID": 15741,
+      "Tipo": "Bug",
+      "Titulo": "[MY] Vitrine PDP não muda os produtos ao passar ID coleção",
+      "Status": "Active",
+      "Sprint": "Digital\\Sprint 48-2026",
+      "Responsavel": "Felipe da Silva",
+      "Tags": "ecommerce",
+      "ID_Pai": 15736,
+      "Story_Points": null,
+      "Data_Criacao": "2026-11-12T13:53:43.103Z",
+      "Ultima_Alteracao": "2026-11-12T15:56:34.497Z",
+      "Dias_Ciclo": null,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15741"
+    },
+    {
+      "ID": 15750,
+      "Tipo": "Problema",
+      "Titulo": "[LP] Trocas e Devoluções - Alterar Link no Menu",
+      "Status": "New",
+      "Sprint": "Digital\\Sprint 48-2026",
+      "Responsavel": "Gustavo De Souza Arruda",
+      "Tags": "PD",
+      "ID_Pai": "Nenhum",
+      "Story_Points": null,
+      "Data_Criacao": "2026-11-12T14:12:42.77Z",
+      "Ultima_Alteracao": "2026-11-12T14:21:22.79Z",
+      "Dias_Ciclo": null,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15750"
+    },
+    {
+      "ID": 15751,
+      "Tipo": "Bug",
+      "Titulo": "[LP] Trocas e Devoluções - Alterar Link no Menu",
+      "Status": "Active",
+      "Sprint": "Digital\\Sprint 48-2026",
+      "Responsavel": "Felipe da Silva",
+      "Tags": "PD",
+      "ID_Pai": 15750,
+      "Story_Points": null,
+      "Data_Criacao": "2026-11-12T14:19:41.3Z",
+      "Ultima_Alteracao": "2026-11-12T15:56:32.63Z",
+      "Dias_Ciclo": null,
+      "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15751"
     }
   ]
 }
