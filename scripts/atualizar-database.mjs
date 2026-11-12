@@ -6,7 +6,8 @@ const ORG = 'lamoda';
 const PROJETO = 'Digital';
 const RESPONSAVEL = 'gustavo.arruda@lamoda.com.br';
 const TIPOS_PAI = ['User Story', 'User Story Design', 'Problema'];
-const ITERACAO_FORA = 'Digital\\Backlog - Web';
+// Iterações que não entram no Dashboard (nem pais, nem filhos)
+const ITERACOES_FORA = ['Digital\\Backlog - Web', 'Digital\\Agent Bug - PD'];
 const ARQUIVO = process.env.ARQUIVO_SAIDA || 'database.json';
 const PAT = process.env.AZDO_PAT;
 
@@ -50,8 +51,7 @@ function wiql(query) {
 }
 
 const filtroPais = (prefixo) => `${prefixo}[System.WorkItemType] IN (${TIPOS_PAI.map(t => `'${t}'`).join(', ')})
-  AND ${prefixo}[System.AssignedTo] = '${RESPONSAVEL}'
-  AND ${prefixo}[System.IterationPath] <> '${ITERACAO_FORA}'`;
+  AND ${prefixo}[System.AssignedTo] = '${RESPONSAVEL}'${ITERACOES_FORA.map(it => `\n  AND ${prefixo}[System.IterationPath] <> '${it}'`).join('')}`;
 
 async function buscarIdsPais() {
   const r = await wiql(`SELECT [System.Id] FROM WorkItems
@@ -119,7 +119,10 @@ async function main() {
   const idsFilhos = await buscarIdsFilhos();
   const ids = Array.from(new Set([...idsPais, ...idsFilhos]));
 
-  const itens = (await buscarItens(ids)).map(paraLinha).sort((a, b) => a.ID - b.ID);
+  // A query só filtra a iteração dos pais; aqui saem também os filhos que estiverem nessas iterações
+  const itens = (await buscarItens(ids)).map(paraLinha)
+    .filter(it => !ITERACOES_FORA.includes(it.Sprint))
+    .sort((a, b) => a.ID - b.ID);
   if (itens.length === 0) throw new Error('O Azure não devolveu nenhum item. Nada foi gravado.');
 
   const saida = { geradoEm: new Date().toISOString(), itens };
