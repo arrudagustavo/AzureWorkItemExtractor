@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-11-18T19:25:48.818Z",
+  "geradoEm": "2026-11-19T19:31:10.675Z",
   "itens": [
     {
       "ID": 9906,
@@ -2817,7 +2817,7 @@
       "ID_Pai": "Nenhum",
       "Story_Points": null,
       "Data_Criacao": "2026-06-19T14:40:55.333Z",
-      "Ultima_Alteracao": "2026-11-06T16:45:23.49Z",
+      "Ultima_Alteracao": "2026-11-19T11:49:28.883Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/13358"
     },
@@ -7190,14 +7190,14 @@
       "ID": 15502,
       "Tipo": "Task",
       "Titulo": "[LP] Header e footer",
-      "Status": "Active",
+      "Status": "Homologação",
       "Sprint": "Digital\\Sprint 49-2026",
       "Responsavel": "Marlon Cligio Almeida Coutinho",
       "Tags": "UX",
       "ID_Pai": 15397,
       "Story_Points": 2,
       "Data_Criacao": "2026-10-29T18:17:24.473Z",
-      "Ultima_Alteracao": "2026-11-16T23:06:40.847Z",
+      "Ultima_Alteracao": "2026-11-18T22:10:54.633Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15502"
     },
@@ -7250,15 +7250,15 @@
       "ID": 15549,
       "Tipo": "Task",
       "Titulo": "[LP] Alterar frase de aviso do Compre Junto - PDP",
-      "Status": "Aguardando Deploy",
+      "Status": "Closed",
       "Sprint": "Digital\\Sprint 48-2026",
       "Responsavel": "Felipe da Silva",
       "Tags": "ecommerce",
       "ID_Pai": 15548,
       "Story_Points": null,
       "Data_Criacao": "2026-11-03T16:09:21.273Z",
-      "Ultima_Alteracao": "2026-11-10T15:51:02.477Z",
-      "Dias_Ciclo": null,
+      "Ultima_Alteracao": "2026-11-18T19:54:44.95Z",
+      "Dias_Ciclo": 13,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/15549"
     },
     {
