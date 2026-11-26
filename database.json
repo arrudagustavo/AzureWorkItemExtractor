@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-11-25T20:29:50.704Z",
+  "geradoEm": "2026-11-26T20:15:03.149Z",
   "itens": [
     {
       "ID": 9906,
@@ -2840,14 +2840,14 @@
       "ID": 13360,
       "Tipo": "Task",
       "Titulo": "[MY] Min e Max caractere - cadastro endereço",
-      "Status": "Active",
+      "Status": "Code Review",
       "Sprint": "Digital\\Sprint 49-2026",
       "Responsavel": "Daniel Fedatto",
       "Tags": "SAC",
       "ID_Pai": 13358,
       "Story_Points": 5,
       "Data_Criacao": "2026-06-19T14:42:04.05Z",
-      "Ultima_Alteracao": "2026-11-25T17:18:44.623Z",
+      "Ultima_Alteracao": "2026-11-26T18:58:23.48Z",
       "Dias_Ciclo": null,
       "URL": "https://dev.azure.com/lamoda/Digital/_workitems/edit/13360"
     },
